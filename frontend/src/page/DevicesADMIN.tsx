@@ -3,11 +3,15 @@ import NavDevice from '../components/NavDevice'
 import Modal from '../components/Modals/Modal'
 import axios from 'axios'
 import { PartialDevice } from '../interfaces/device'
+import ModalCreateDevice from '../components/Modals/ModalCreateDevice'
+import ModalCreateVendor from '../components/Modals/ModalCreateVendor'
 
-const DevicesPage = () => {
+const DevicesADMIN = () => {
   const [showNavBar, setShowNavBar] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [showModal, setShowModal] = useState(false)
+  const [showModalDevice, setShowModalDevice] = useState(false)
+  const [showModalVendor, setShowModalVendor] = useState(false)
   const [vendorArr, setVendorArr] = useState<PartialDevice>([])
 
   const handleScroll = () => {
@@ -48,6 +52,8 @@ const DevicesPage = () => {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <ModalCreateDevice show={showModalDevice} setShow={setShowModalDevice} />
+      <ModalCreateVendor show={showModalVendor} setShow={setShowModalVendor} />
       <Modal show={showModal} setShow={setShowModal} />
       <div
         className={`fixed left-0 top-0 w-full bg-white transition-transform duration-300 ${
@@ -90,6 +96,25 @@ const DevicesPage = () => {
                   </a>
                 </div>
               ))}
+              <div
+                className="m-auto flex aspect-square w-8 cursor-pointer items-center justify-center rounded-lg bg-primary text-white transition-transform duration-200 hover:scale-110"
+                title="Добавить поставщика"
+                onClick={() => setShowModalVendor(true)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </div>
             </div>
 
             {vendorArr.map((vendor, index) => (
@@ -118,7 +143,7 @@ const DevicesPage = () => {
                         </a>
                         <a
                           href={`/devices/${device.code}`}
-                          className="block bg-[#fff]"
+                          className="block h-full bg-[#fff]"
                         >
                           <div className="mt-4 overflow-hidden text-ellipsis whitespace-nowrap pl-2 text-lg text-primary hover:border-b hover:border-primary">
                             {device.model}
@@ -129,6 +154,26 @@ const DevicesPage = () => {
                         </a>
                       </div>
                     ))}
+                    <div
+                      className="m-auto flex aspect-square w-20 cursor-pointer items-center justify-center rounded-lg bg-primary text-white transition-transform duration-200 hover:scale-110"
+                      title="Добавить устройство"
+                      onClick={() => setShowModalDevice(true)}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="h-10 w-10"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 4.5v15m7.5-7.5h-15"
+                        />
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -169,4 +214,4 @@ const DevicesPage = () => {
   )
 }
 
-export default DevicesPage
+export default DevicesADMIN
