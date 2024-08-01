@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react'
+import {
+  changeVendor,
+  createVendor,
+  deleteVendor,
+} from '../../utils/vendor/func'
+import { ActionType } from '../../interfaces/vendor'
 
 interface ModalProps {
   show: boolean
   setShow: React.Dispatch<React.SetStateAction<boolean>>
+  action: ActionType
 }
 
-const ModalCreateVendor: React.FC<ModalProps> = ({ show, setShow }) => {
+const ModalVendor: React.FC<ModalProps> = ({ show, setShow, action }) => {
   const [isVisible, setIsVisible] = useState(show)
+  const [value, setValue] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (show) {
@@ -22,7 +31,7 @@ const ModalCreateVendor: React.FC<ModalProps> = ({ show, setShow }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
-        setShow(false)
+        handleEnter()
       }
     }
 
@@ -35,13 +44,32 @@ const ModalCreateVendor: React.FC<ModalProps> = ({ show, setShow }) => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [show, setShow])
+  }, [show])
 
   const handleOutsideClick = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => {
     if (e.target === e.currentTarget) {
       setShow(false)
+    }
+  }
+
+  function handleEnter() {
+    if (action.type !== 'Удалить' && !value.trim()) {
+      setError('Название не может быть пустым')
+      return
+    }
+    try {
+      if (action.type === 'Добавить') createVendor(value)
+      if (action.type === 'Изменить') changeVendor(value, action.id)
+      if (action.type === 'Удалить') deleteVendor(action.id)
+
+      setValue('')
+      setError(null)
+      setShow(false)
+    } catch (err) {
+      console.error('Error creating vendor:', err)
+      setError('Не удалось создать поставщика. Попробуйте снова.')
     }
   }
 
@@ -62,10 +90,13 @@ const ModalCreateVendor: React.FC<ModalProps> = ({ show, setShow }) => {
             >
               <div className="relative flex w-[300px] flex-col rounded-lg border-0 bg-white shadow-lg outline-none focus:outline-none md:w-[400px]">
                 <div className="flex items-center justify-between p-5">
-                  <h3 className="text-3xl font-light">Добавлене поставщика</h3>
+                  <h3 className="text-3xl font-light">
+                    {action.type} поставщика
+                  </h3>
                   <button
                     className="text-4xl font-light text-[#555555]"
                     onClick={() => setShow(false)}
+                    aria-label="Close"
                   >
                     <span>×</span>
                   </button>
@@ -73,11 +104,24 @@ const ModalCreateVendor: React.FC<ModalProps> = ({ show, setShow }) => {
                 {/* Body */}
                 <div className="relative flex-auto px-6">
                   <div className="overflow-y-auto">
-                    <label>Название</label>
-                    <input
-                      type="text"
-                      className="h-10 w-full rounded-[0.2rem] border border-primary bg-[#e8e8e8]/50 px-3 text-lg uppercase transition-colors duration-200 focus:bg-[#e8e8e8] focus:outline-none"
-                    />
+                    {action.type === 'Удалить' ? (
+                      <div className="my-3 text-lg">
+                        Вы действительно хотите удалить?
+                      </div>
+                    ) : (
+                      <>
+                        <label htmlFor="vendor-name">Название</label>
+                        <input
+                          id="vendor-name"
+                          type="text"
+                          className="h-10 w-full rounded-[0.2rem] border border-primary bg-[#e8e8e8]/50 px-3 text-lg transition-colors duration-200 focus:bg-[#e8e8e8] focus:outline-none"
+                          placeholder="Введите название ..."
+                          value={value}
+                          onChange={(e) => setValue(e.target.value)}
+                        />
+                        {error && <p className="mt-2 text-red-500">{error}</p>}
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -86,9 +130,9 @@ const ModalCreateVendor: React.FC<ModalProps> = ({ show, setShow }) => {
                   <button
                     className="w-full rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg hover:shadow-primary/50"
                     type="button"
-                    onClick={() => setShow(false)}
+                    onClick={handleEnter}
                   >
-                    Добавить
+                    {action.type}
                   </button>
                 </div>
               </div>
@@ -105,4 +149,4 @@ const ModalCreateVendor: React.FC<ModalProps> = ({ show, setShow }) => {
   )
 }
 
-export default ModalCreateVendor
+export default ModalVendor

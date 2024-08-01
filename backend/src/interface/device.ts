@@ -23,20 +23,3 @@ export interface DeviceType {
   Info: InfoDevice;
   Specific: SpecificDevice;
 }
-
-export interface VendorType {
-  Name: string;
-  Device: DeviceType;
-}
-
-export interface PartialDevice {
-  vendor: {
-    Name: string;
-    Device: {
-      Name: {
-        Model: string;
-        Code: string;
-      };
-    };
-  };
-}

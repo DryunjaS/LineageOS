@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react'
 import NavDevice from '../components/NavDevice'
 import Modal from '../components/Modals/Modal'
-import axios from 'axios'
-import { PartialDevice } from '../interfaces/device'
+import { getVendors } from '../utils/vendor/func'
+import { getDevicesGroupedByVendor } from '../utils/device/func'
+import { VendorType } from '../interfaces/vendor'
+import { DevicesGroupType } from './DevicesADMIN'
+import DevicePreview from '../components/DevicePreview'
 
 const DevicesPage = () => {
   const [showNavBar, setShowNavBar] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [showModal, setShowModal] = useState(false)
-  const [vendorArr, setVendorArr] = useState<PartialDevice>([])
+  const [vendorArr, setVendorArr] = useState<VendorType[]>([])
+  const [devicesGroup, setDevicesGroup] = useState<DevicesGroupType[]>([])
 
   const handleScroll = () => {
     const currentScrollY = window.scrollY
@@ -28,22 +32,24 @@ const DevicesPage = () => {
   }, [lastScrollY])
 
   useEffect(() => {
-    axios
-      .get(import.meta.env.VITE_URL_SERVER)
-      .then((res) => {
-        console.log(res.data)
-        const transformedData = res.data.map((item) => ({
-          vendor: item.vendor.Name,
-          devices: [
-            {
-              model: item.vendor.Device.Name.Model,
-              code: item.vendor.Device.Name.Code,
-            },
-          ],
-        }))
-        setVendorArr(transformedData)
+    getVendors()
+      .then((response) => {
+        setVendorArr(response)
+        console.log(response)
       })
-      .catch((err) => console.log(err))
+      .catch((err) => {
+        console.log(err)
+      })
+  }, [])
+  useEffect(() => {
+    getDevicesGroupedByVendor()
+      .then((response) => {
+        setDevicesGroup(response)
+        console.log(response)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
   }, [])
 
   return (
@@ -83,52 +89,31 @@ const DevicesPage = () => {
               {vendorArr.map((vendor, index) => (
                 <div key={index} className="p-2 text-primary">
                   <a
-                    href={`#${vendor.vendor}`}
+                    href={`#${vendor.name}`}
                     className="hover:border-b hover:border-primary"
                   >
-                    {vendor.vendor}
+                    {vendor.name}
                   </a>
                 </div>
               ))}
             </div>
 
-            {vendorArr.map((vendor, index) => (
+            {devicesGroup.map((group, index) => (
               <div key={index} className="mx-auto w-[240px] scr350:w-auto">
-                <div id={vendor.vendor} className="mt-14 pb-5">
-                  <h2 className="mb-4 text-3xl font-light">{vendor.vendor}</h2>
+                <div id={group.name} className="mt-14 pb-5">
+                  <h2 className="mb-4 text-3xl font-light">{group.name}</h2>
                   <a href="#devices" className="mb-4 block text-primary">
                     ▲ На верх
                   </a>
                   <div className="grid grid-cols-1 gap-y-4 scr350:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                    {vendor.devices.map((device, deviceIndex) => (
-                      <div key={deviceIndex} className="bg-[#f6fafa]">
-                        <a
-                          href={`/devices/${device.code}`}
-                          className="mx-auto flex h-[220px] w-auto flex-col items-center justify-center p-8 scr350:h-[150px] scr350:w-[180px]"
-                        >
-                          <img
-                            src={`/images/${
-                              device.code === 'Другое название'
-                                ? 'unknown'
-                                : device.code
-                            }.png`}
-                            className="h-[220px] w-auto scr350:h-[120px]"
-                            alt={device.model}
-                          />
-                        </a>
-                        <a
-                          href={`/devices/${device.code}`}
-                          className="block bg-[#fff]"
-                        >
-                          <div className="mt-4 overflow-hidden text-ellipsis whitespace-nowrap pl-2 text-lg text-primary hover:border-b hover:border-primary">
-                            {device.model}
-                          </div>
-                          <div className="w-max text-wrap pl-2 text-[#555555] hover:border-b hover:border-[#555555]">
-                            {device.code}
-                          </div>
-                        </a>
-                      </div>
+                    {group.devices.map((device, deviceIndex) => (
+                      <DevicePreview
+                        key={deviceIndex}
+                        code={device.name.Code}
+                        model={device.name.Model}
+                      />
                     ))}
+                    <DevicePreview code={'Другое'} model={'Другое'} />
                   </div>
                 </div>
               </div>

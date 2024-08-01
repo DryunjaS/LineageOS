@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Devices } from 'src/devices/devices.entity';
+import { Device } from 'src/device/device.entity';
+import { Vendor } from 'src/vendor/vendor.entity';
 
 @Module({
   imports: [
@@ -11,10 +12,10 @@ import { Devices } from 'src/devices/devices.entity';
       username: 'postgres',
       password: '1',
       database: 'lineage',
-      entities: [Devices],
+      entities: [Device, Vendor],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Devices]),
+    TypeOrmModule.forFeature([Device, Vendor]),
   ],
   exports: [TypeOrmModule],
 })
