@@ -17,9 +17,13 @@ export interface SpecificDevice {
   Specifications: { [key: string]: string[] };
   LineageOS_info: { [key: string]: string[] };
 }
-
+export interface VendorType {
+  id: number | null;
+  name: string;
+}
 export interface DeviceType {
   Name: NameDevice;
   Info: InfoDevice;
   Specific: SpecificDevice;
+  vendor: VendorType;
 }

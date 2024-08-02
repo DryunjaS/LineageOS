@@ -2,7 +2,7 @@ const DevicePreview = ({ code, model }: { code: string; model: string }) => {
   return (
     <div className="bg-[#f6fafa]">
       <a
-        href={`/devices/${code}`}
+        href={`/devices/${code === 'Другое' ? 'unknown' : code}`}
         className="mx-auto flex h-[220px] w-auto flex-col items-center justify-center p-8 scr350:h-[150px] scr350:w-[180px]"
       >
         <img
@@ -11,7 +11,10 @@ const DevicePreview = ({ code, model }: { code: string; model: string }) => {
           alt={model}
         />
       </a>
-      <a href={`/devices/${code}`} className="block h-full bg-[#fff]">
+      <a
+        href={`/devices/${code === 'Другое' ? 'unknown' : code}`}
+        className="block h-full bg-[#fff]"
+      >
         <div className="mt-4 w-max overflow-hidden text-ellipsis whitespace-nowrap pl-2 text-lg text-primary hover:border-b hover:border-primary">
           {model}
         </div>

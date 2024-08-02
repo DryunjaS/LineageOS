@@ -1,3 +1,5 @@
+import { VendorType } from './vendor'
+
 export interface NameDevice {
   Model: string
   Code: string
@@ -22,4 +24,5 @@ export interface DeviceType {
   Name: NameDevice
   Info: InfoDevice
   Specific: SpecificDevice
+  vendor: VendorType
 }

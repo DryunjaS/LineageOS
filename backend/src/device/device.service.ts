@@ -28,18 +28,13 @@ export class DeviceService {
   }
 
   async createDevice(deviceData: Partial<Device>): Promise<Device> {
+    console.log(deviceData);
+
     if (!deviceData.vendor || !deviceData.vendor.id) {
       throw new NotFoundException('Vendor not found');
     }
 
-    const vendor = await this.vendorRepository.findOneBy({
-      id: deviceData.vendor.id,
-    });
-    if (!vendor) {
-      throw new NotFoundException('Vendor not found');
-    }
-
-    const newDevice = this.deviceRepository.create({ ...deviceData, vendor });
+    const newDevice = this.deviceRepository.create(deviceData);
     return this.deviceRepository.save(newDevice);
   }
 

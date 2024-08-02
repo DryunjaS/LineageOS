@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import NavDevice from '../components/NavDevice'
 import { useParams } from 'react-router-dom'
 
-const ItemPage = () => {
+const ItemADMIN = () => {
   const [showNavBar, setShowNavBar] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const { device } = useParams()
@@ -23,10 +23,12 @@ const ItemPage = () => {
       window.removeEventListener('scroll', handleScroll)
     }
   }, [lastScrollY])
+
+  const handleChange = (field: string) => {}
   return (
     <div className="flex min-h-screen flex-col">
       <div
-        className={`fixed left-0 top-0 z-10 w-full bg-white transition-transform duration-300${
+        className={`fixed left-0 top-0 w-full bg-white transition-transform duration-300 ${
           showNavBar ? 'translate-y-0 transform' : '-translate-y-full transform'
         }`}
       >
@@ -59,11 +61,33 @@ const ItemPage = () => {
                 <span className="underline-on-hover">Devices</span>
               </a>
               <h1 className="text-5xl font-light text-[#555555]">{device}</h1>
-              <h3 className="text-xl text-[#555555]">{device}</h3>
+              <h3 className="text-xl text-[#555555]">G</h3>
             </div>
 
             <div className="mb-6 space-y-3">
-              <h2 className="device-title">Downloads</h2>
+              <div className="flex items-center gap-x-2">
+                <h2 className="device-title">Downloads</h2>
+                <span
+                  className="cursor-pointer py-1"
+                  onClick={() => handleChange('Downloads')}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+                    />
+                  </svg>
+                </span>
+              </div>
+
               <div className="text-md underline-on-hover w-max cursor-pointer text-primary">
                 Get the builds here
               </div>
@@ -365,4 +389,4 @@ const ItemPage = () => {
   )
 }
 
-export default ItemPage
+export default ItemADMIN

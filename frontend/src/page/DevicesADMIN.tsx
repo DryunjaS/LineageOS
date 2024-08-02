@@ -1,18 +1,26 @@
 import { useEffect, useState } from 'react'
 import NavDevice from '../components/NavDevice'
 import Modal from '../components/Modals/Modal'
-import ModalCreateDevice from '../components/Modals/ModalCreateDevice'
 import { getVendors } from '../utils/vendor/func'
 import ModalVendor from '../components/Modals/ModalVendor'
-import { ActionType, VendorType } from '../interfaces/vendor'
+import {
+  ActionDeviceType,
+  ActionVendorType,
+  VendorType,
+} from '../interfaces/vendor'
 import { NameDevice } from '../interfaces/device'
 import { getDevicesGroupedByVendor } from '../utils/device/func'
 import DevicePreview from '../components/DevicePreview'
+import DeleteIcon from '../components/icons/Delete'
+import WriteIcon from '../components/icons/Write'
+import PlusIcon from '../components/icons/Plus'
+import ModalDevice from '../components/Modals/ModalDevice'
 
 interface DevicesGroupItemType {
   id: number | null
   name: NameDevice
 }
+
 export interface DevicesGroupType {
   id: number | null
   name: string
@@ -21,12 +29,28 @@ export interface DevicesGroupType {
 const DevicesADMIN = () => {
   const [showNavBar, setShowNavBar] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+
   const [showModal, setShowModal] = useState(false)
   const [showModalDevice, setShowModalDevice] = useState(false)
   const [showModalVendor, setShowModalVendor] = useState(false)
+
   const [vendorArr, setVendorArr] = useState<VendorType[]>([])
   const [devicesGroup, setDevicesGroup] = useState<DevicesGroupType[]>([])
-  const [action, setAction] = useState<ActionType>({ type: '', id: null })
+  const [actionVendor, setActionVendor] = useState<ActionVendorType>({
+    id: null,
+    name: '',
+    type: '',
+  })
+  const [actionDevice, setActionDevice] = useState<ActionDeviceType>({
+    id: null,
+    model: '',
+    code: '',
+    type: '',
+  })
+  const [vendorDevice, setVendorDevice] = useState<VendorType>({
+    id: null,
+    name: '',
+  })
 
   const handleScroll = () => {
     const currentScrollY = window.scrollY
@@ -54,8 +78,6 @@ const DevicesADMIN = () => {
       .catch((err) => {
         console.log(err)
       })
-  }, [])
-  useEffect(() => {
     getDevicesGroupedByVendor()
       .then((response) => {
         setDevicesGroup(response)
@@ -68,32 +90,75 @@ const DevicesADMIN = () => {
 
   const addVendor = () => {
     setShowModalVendor(true)
-    setAction({
+    setActionVendor({
       type: 'Добавить',
       id: null,
+      name: '',
     })
   }
-  const changeVendor = (changeID: number) => {
+  const changeVendor = (changeID: number, lastName: string) => {
     setShowModalVendor(true)
-    setAction({
+    setActionVendor({
       type: 'Изменить',
       id: changeID,
+      name: lastName,
     })
   }
-  const deleteVendor = (deleteID: number) => {
+  const deleteVendor = (deleteID: number, lastName: string) => {
     setShowModalVendor(true)
-    setAction({
+    setActionVendor({
       type: 'Удалить',
       id: deleteID,
+      name: lastName,
     })
   }
+  const addDevice = (vendor: VendorType) => {
+    setShowModalDevice(true)
+    setVendorDevice(vendor)
+    setActionDevice({
+      type: 'Добавить',
+      id: null,
+      model: '',
+      code: '',
+    })
+  }
+  const deleteDevice = (deleteID: number, lastName: NameDevice) => {
+    setShowModalDevice(true)
+    setVendorDevice({ id: null, name: '' })
+    setActionDevice({
+      type: 'Удалить',
+      id: deleteID,
+      model: lastName.Model,
+      code: lastName.Code,
+    })
+  }
+  const changeDevice = (
+    vendor: VendorType,
+    changeID: number,
+    lastName: NameDevice,
+  ) => {
+    setShowModalDevice(true)
+    setVendorDevice({ id: vendor.id, name: vendor.name })
+    setActionDevice({
+      type: 'Изменить',
+      id: changeID,
+      model: lastName.Model,
+      code: lastName.Code,
+    })
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
-      <ModalCreateDevice show={showModalDevice} setShow={setShowModalDevice} />
+      <ModalDevice
+        show={showModalDevice}
+        setShow={setShowModalDevice}
+        vendorDevice={vendorDevice}
+        action={actionDevice}
+      />
       <ModalVendor
         show={showModalVendor}
         setShow={setShowModalVendor}
-        action={action}
+        action={actionVendor}
       />
       <Modal show={showModal} setShow={setShowModal} />
       <div
@@ -130,23 +195,10 @@ const DevicesADMIN = () => {
               {vendorArr.map((vendor, index) => (
                 <div className="flex items-center">
                   <span
-                    className="cursor-pointer py-1"
-                    onClick={() => deleteVendor(vendor.id)}
+                    className="cursor-pointer rounded-md p-1 hover:bg-primary hover:text-white"
+                    onClick={() => deleteVendor(vendor.id, vendor.name)}
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="size-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                      />
-                    </svg>
+                    <DeleteIcon />
                   </span>
 
                   <div key={index} className="p-2 text-primary">
@@ -158,44 +210,19 @@ const DevicesADMIN = () => {
                     </a>
                   </div>
                   <span
-                    className="cursor-pointer py-1"
-                    onClick={() => changeVendor(vendor.id)}
+                    className="cursor-pointer rounded-md p-1 hover:bg-primary hover:text-white"
+                    onClick={() => changeVendor(vendor.id, vendor.name)}
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="size-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                      />
-                    </svg>
+                    <WriteIcon />
                   </span>
                 </div>
               ))}
               <div
-                className="flex aspect-square w-8 cursor-pointer items-center justify-center rounded-lg bg-primary text-white transition-transform duration-200 hover:scale-110"
+                className="flex aspect-square w-8 cursor-pointer items-center justify-center rounded-md bg-primary text-white transition-transform duration-200 hover:scale-110"
                 title="Добавить поставщика"
                 onClick={addVendor}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4.5v15m7.5-7.5h-15"
-                  />
-                </svg>
+                <PlusIcon />
               </div>
             </div>
 
@@ -208,32 +235,41 @@ const DevicesADMIN = () => {
                   </a>
                   <div className="grid grid-cols-1 gap-y-4 scr350:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                     {group.devices.map((device, deviceIndex) => (
-                      <DevicePreview
-                        key={deviceIndex}
-                        code={device.name.Code}
-                        model={device.name.Model}
-                      />
+                      <div className="relative">
+                        <DevicePreview
+                          key={deviceIndex}
+                          code={device.name.Code}
+                          model={device.name.Model}
+                        />
+                        <span
+                          className="absolute left-2 top-2 cursor-pointer rounded-md p-1 hover:bg-primary hover:text-white"
+                          onClick={() => deleteDevice(device.id, device.name)}
+                        >
+                          <DeleteIcon />
+                        </span>
+                        <span
+                          className="absolute right-2 top-2 cursor-pointer rounded-md p-1 hover:bg-primary hover:text-white"
+                          onClick={() =>
+                            changeDevice(
+                              { id: group.id, name: group.name },
+                              device.id,
+                              device.name,
+                            )
+                          }
+                        >
+                          <WriteIcon />
+                        </span>
+                      </div>
                     ))}
                     <DevicePreview code={'Другое'} model={'Другое'} />
                     <div
-                      className="m-auto flex aspect-square w-20 cursor-pointer items-center justify-center rounded-lg bg-primary text-white transition-transform duration-200 hover:scale-110"
+                      className="mx-auto mt-10 flex aspect-square w-20 cursor-pointer items-center justify-center rounded-lg bg-primary text-white transition-transform duration-200 hover:scale-110"
                       title="Добавить устройство"
-                      onClick={() => setShowModalDevice(true)}
+                      onClick={() =>
+                        addDevice({ id: group.id, name: group.name })
+                      }
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="h-10 w-10"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 4.5v15m7.5-7.5h-15"
-                        />
-                      </svg>
+                      <PlusIcon />
                     </div>
                   </div>
                 </div>

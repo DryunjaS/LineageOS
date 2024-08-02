@@ -1,25 +1,37 @@
 import React, { useState, useEffect } from 'react'
+import { NameDevice } from '../../interfaces/device'
 import {
-  changeVendor,
-  createVendor,
-  deleteVendor,
-} from '../../utils/vendor/func'
-import { ActionVendorType } from '../../interfaces/vendor'
+  changeDevice,
+  createDevice,
+  deleteDevice,
+} from '../../utils/device/func'
+import { ActionDeviceType, VendorType } from '../../interfaces/vendor'
 
 interface ModalProps {
   show: boolean
   setShow: React.Dispatch<React.SetStateAction<boolean>>
-  action: ActionVendorType
+  vendorDevice: VendorType
+  action: ActionDeviceType
 }
 
-const ModalVendor: React.FC<ModalProps> = ({ show, setShow, action }) => {
+const ModalDevice: React.FC<ModalProps> = ({
+  show,
+  setShow,
+  vendorDevice,
+  action,
+}) => {
   const [isVisible, setIsVisible] = useState(show)
-  const [value, setValue] = useState('')
+  const [device, setDevice] = useState<NameDevice>()
   const [error, setError] = useState<string | null>(null)
+
   useEffect(() => {
     if (show) {
       setIsVisible(true)
-      setValue(action.name)
+      setDevice({
+        Model: action.model,
+        Code: action.code,
+      })
+      console.log(device)
       document.body.classList.add('modal-open')
     } else {
       const timeoutId = setTimeout(() => setIsVisible(false), 300)
@@ -54,22 +66,46 @@ const ModalVendor: React.FC<ModalProps> = ({ show, setShow, action }) => {
     }
   }
 
-  function handleEnter() {
-    if (action.type !== 'Удалить' && !value.trim()) {
-      setError('Название не может быть пустым')
+  const handleEnter = async () => {
+    if (!device.Model.trim() || !device.Code.trim()) {
+      setError('Название и код не могут быть пустыми')
       return
     }
-    try {
-      if (action.type === 'Добавить') createVendor(value)
-      if (action.type === 'Изменить') changeVendor(value, action.id)
-      if (action.type === 'Удалить') deleteVendor(action.id)
+    const info = {
+      Downloads: '',
+      Guides: [],
+      Special_boot_modes: [],
+      Known_quirks: [],
+      Find_help_online: '',
+      Report_a_bug: '',
+    }
+    const specific = {
+      Main: {},
+      Specifications: {},
+      LineageOS_info: {},
+    }
 
-      setValue('')
+    try {
+      const newDevice = {
+        Name: { Model: device.Model.trim(), Code: device.Code.trim() },
+        Info: info,
+        Specific: specific,
+        vendor: {
+          id: vendorDevice.id,
+          name: vendorDevice.name,
+        },
+      }
+
+      if (action.type === 'Добавить') await createDevice(newDevice)
+      if (action.type === 'Изменить') await changeDevice(newDevice, action.id)
+      if (action.type === 'Удалить') await deleteDevice(action.id)
+
+      setDevice({ Model: '', Code: '' })
       setError(null)
       setShow(false)
     } catch (err) {
-      console.error('Error creating vendor:', err)
-      setError('Не удалось создать поставщика. Попробуйте снова.')
+      console.error('Error creating device:', err)
+      setError('Не удалось создать устройство. Попробуйте снова.')
     }
   }
 
@@ -91,12 +127,11 @@ const ModalVendor: React.FC<ModalProps> = ({ show, setShow, action }) => {
               <div className="relative flex w-[300px] flex-col rounded-lg border-0 bg-white shadow-lg outline-none focus:outline-none md:w-[400px]">
                 <div className="flex items-center justify-between p-5">
                   <h3 className="text-3xl font-light">
-                    {action.type} поставщика
+                    {action.type} устройство
                   </h3>
                   <button
                     className="text-4xl font-light text-[#555555]"
                     onClick={() => setShow(false)}
-                    aria-label="Close"
                   >
                     <span>×</span>
                   </button>
@@ -107,20 +142,32 @@ const ModalVendor: React.FC<ModalProps> = ({ show, setShow, action }) => {
                     {action.type === 'Удалить' ? (
                       <div className="my-3 text-lg">
                         Вы действительно хотите удалить <br />
-                        {action.name} ?
+                        {action.model} ?
                       </div>
                     ) : (
                       <>
-                        <label htmlFor="vendor-name">Название</label>
+                        <label>Название</label>
                         <input
-                          id="vendor-name"
                           type="text"
                           className="h-10 w-full rounded-[0.2rem] border border-primary bg-[#e8e8e8]/50 px-3 text-lg transition-colors duration-200 focus:bg-[#e8e8e8] focus:outline-none"
-                          placeholder="Введите название ..."
-                          value={value}
-                          onChange={(e) => setValue(e.target.value)}
+                          placeholder="Введите название..."
+                          value={device.Model}
+                          onChange={(e) =>
+                            setDevice({ ...device, Model: e.target.value })
+                          }
                         />
-                        {error && <p className="mt-2 text-red-500">{error}</p>}
+
+                        <label className="mt-5 block">Код</label>
+                        <input
+                          type="text"
+                          className="h-10 w-full rounded-[0.2rem] border border-primary bg-[#e8e8e8]/50 px-3 text-lg transition-colors duration-200 focus:bg-[#e8e8e8] focus:outline-none"
+                          placeholder="Введите код..."
+                          value={device.Code}
+                          onChange={(e) =>
+                            setDevice({ ...device, Code: e.target.value })
+                          }
+                        />
+                        {error && <p className="text-red-500">{error}</p>}
                       </>
                     )}
                   </div>
@@ -150,4 +197,4 @@ const ModalVendor: React.FC<ModalProps> = ({ show, setShow, action }) => {
   )
 }
 
-export default ModalVendor
+export default ModalDevice
