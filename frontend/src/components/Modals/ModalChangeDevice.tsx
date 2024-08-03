@@ -4,32 +4,22 @@ import {
   changeDevice,
   createDevice,
   deleteDevice,
-  getDevicesGroupedByVendor,
 } from '../../utils/device/func'
-import { ActionDeviceType, VendorType } from '../../interfaces/vendor'
-import { useDispatch, useSelector } from 'react-redux'
-import {
-  addDevicetoVendor,
-  removeDevicetoVendor,
-  setVendors,
-  updateDevicetoVendor,
-} from '../../store/vendorSlice'
+import { VendorType } from '../../interfaces/vendor'
 
 interface ModalProps {
   show: boolean
   setShow: React.Dispatch<React.SetStateAction<boolean>>
   vendorDevice: VendorType
-  action: ActionDeviceType
+  field: string
 }
 
-const ModalDevice: React.FC<ModalProps> = ({
+const ModalChangeDevice: React.FC<ModalProps> = ({
   show,
   setShow,
   vendorDevice,
-  action,
+  field,
 }) => {
-  const dispatch = useDispatch()
-
   const [isVisible, setIsVisible] = useState(show)
   const [device, setDevice] = useState<NameDevice>()
   const [error, setError] = useState<string | null>(null)
@@ -41,6 +31,7 @@ const ModalDevice: React.FC<ModalProps> = ({
         Model: action.model,
         Code: action.code,
       })
+      console.log(device)
       document.body.classList.add('modal-open')
     } else {
       const timeoutId = setTimeout(() => setIsVisible(false), 300)
@@ -80,7 +71,6 @@ const ModalDevice: React.FC<ModalProps> = ({
       setError('Название и код не могут быть пустыми')
       return
     }
-
     const info = {
       Downloads: '',
       Guides: [],
@@ -106,39 +96,16 @@ const ModalDevice: React.FC<ModalProps> = ({
         },
       }
 
-      if (action.type === 'Добавить') {
-        await createDevice(newDevice)
-        const res = await getDevicesGroupedByVendor()
-        dispatch(setVendors(res))
-      }
-
-      if (action.type === 'Изменить') {
-        await changeDevice(newDevice, action.id)
-        dispatch(
-          updateDevicetoVendor({
-            idVendor: vendorDevice.id,
-            idDevice: action.id,
-            data: newDevice.Name,
-          }),
-        )
-      }
-
-      if (action.type === 'Удалить') {
-        await deleteDevice(action.id)
-        dispatch(
-          removeDevicetoVendor({
-            idVendor: vendorDevice.id,
-            idDevice: action.id,
-          }),
-        )
-      }
+      if (action.type === 'Добавить') await createDevice(newDevice)
+      if (action.type === 'Изменить') await changeDevice(newDevice, action.id)
+      if (action.type === 'Удалить') await deleteDevice(action.id)
 
       setDevice({ Model: '', Code: '' })
       setError(null)
       setShow(false)
     } catch (err) {
-      console.error('Error handling device:', err)
-      setError('Не удалось выполнить действие. Попробуйте снова.')
+      console.error('Error creating device:', err)
+      setError('Не удалось создать устройство. Попробуйте снова.')
     }
   }
 
@@ -230,4 +197,4 @@ const ModalDevice: React.FC<ModalProps> = ({
   )
 }
 
-export default ModalDevice
+export default ModalChangeDevice

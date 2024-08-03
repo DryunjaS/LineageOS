@@ -15,6 +15,8 @@ import DeleteIcon from '../components/icons/Delete'
 import WriteIcon from '../components/icons/Write'
 import PlusIcon from '../components/icons/Plus'
 import ModalDevice from '../components/Modals/ModalDevice'
+import { useDispatch, useSelector } from 'react-redux'
+import { setVendors } from '../store/vendorSlice'
 
 interface DevicesGroupItemType {
   id: number | null
@@ -27,6 +29,9 @@ export interface DevicesGroupType {
   devices: DevicesGroupItemType[]
 }
 const DevicesADMIN = () => {
+  const dispatch = useDispatch()
+  const vendors = useSelector((state) => state.vendor.vendors)
+
   const [showNavBar, setShowNavBar] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
 
@@ -34,8 +39,6 @@ const DevicesADMIN = () => {
   const [showModalDevice, setShowModalDevice] = useState(false)
   const [showModalVendor, setShowModalVendor] = useState(false)
 
-  const [vendorArr, setVendorArr] = useState<VendorType[]>([])
-  const [devicesGroup, setDevicesGroup] = useState<DevicesGroupType[]>([])
   const [actionVendor, setActionVendor] = useState<ActionVendorType>({
     id: null,
     name: '',
@@ -70,17 +73,9 @@ const DevicesADMIN = () => {
   }, [lastScrollY])
 
   useEffect(() => {
-    getVendors()
-      .then((response) => {
-        setVendorArr(response)
-        console.log(response)
-      })
-      .catch((err) => {
-        console.log(err)
-      })
     getDevicesGroupedByVendor()
       .then((response) => {
-        setDevicesGroup(response)
+        dispatch(setVendors(response))
         console.log(response)
       })
       .catch((err) => {
@@ -122,12 +117,16 @@ const DevicesADMIN = () => {
       code: '',
     })
   }
-  const deleteDevice = (deleteID: number, lastName: NameDevice) => {
+  const deleteDevice = (
+    idDevice: number,
+    idVendor: number,
+    lastName: NameDevice,
+  ) => {
     setShowModalDevice(true)
-    setVendorDevice({ id: null, name: '' })
+    setVendorDevice({ id: idDevice, name: '' })
     setActionDevice({
       type: 'Удалить',
-      id: deleteID,
+      id: idVendor,
       model: lastName.Model,
       code: lastName.Code,
     })
@@ -192,7 +191,7 @@ const DevicesADMIN = () => {
             </h2>
 
             <div className="grid grid-cols-2 gap-2 rounded-[4px] border border-[#e8e8e8] p-1 lg:grid-cols-3">
-              {vendorArr.map((vendor, index) => (
+              {vendors.map((vendor) => (
                 <div className="flex items-center">
                   <span
                     className="cursor-pointer rounded-md p-1 hover:bg-primary hover:text-white"
@@ -201,7 +200,7 @@ const DevicesADMIN = () => {
                     <DeleteIcon />
                   </span>
 
-                  <div key={index} className="p-2 text-primary">
+                  <div key={vendor.id} className="p-2 text-primary">
                     <a
                       href={`#${vendor.name}`}
                       className="hover:border-b hover:border-primary"
@@ -226,24 +225,29 @@ const DevicesADMIN = () => {
               </div>
             </div>
 
-            {devicesGroup.map((group, index) => (
-              <div key={index} className="mx-auto w-[240px] scr350:w-auto">
+            {vendors.map((group) => (
+              <div key={group.id} className="mx-auto w-[240px] scr350:w-auto">
                 <div id={group.name} className="mt-14 pb-5">
                   <h2 className="mb-4 text-3xl font-light">{group.name}</h2>
                   <a href="#devices" className="mb-4 block text-primary">
                     ▲ На верх
                   </a>
                   <div className="grid grid-cols-1 gap-y-4 scr350:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                    {group.devices.map((device, deviceIndex) => (
+                    {group.devices.map((device) => (
                       <div className="relative">
                         <DevicePreview
-                          key={deviceIndex}
+                          key={device.id}
                           code={device.name.Code}
                           model={device.name.Model}
                         />
                         <span
                           className="absolute left-2 top-2 cursor-pointer rounded-md p-1 hover:bg-primary hover:text-white"
-                          onClick={() => deleteDevice(device.id, device.name)}
+                          onClick={() =>
+                            deleteDevice(group.id, device.id, {
+                              Model: device.name.Model,
+                              Code: device.name.Code,
+                            })
+                          }
                         >
                           <DeleteIcon />
                         </span>

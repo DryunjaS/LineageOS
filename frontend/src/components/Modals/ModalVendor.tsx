@@ -5,6 +5,8 @@ import {
   deleteVendor,
 } from '../../utils/vendor/func'
 import { ActionVendorType } from '../../interfaces/vendor'
+import { useDispatch, useSelector } from 'react-redux'
+import { addVendor, removeVendor, updateVendor } from '../../store/vendorSlice'
 
 interface ModalProps {
   show: boolean
@@ -13,6 +15,9 @@ interface ModalProps {
 }
 
 const ModalVendor: React.FC<ModalProps> = ({ show, setShow, action }) => {
+  const dispatch = useDispatch()
+  const vendors = useSelector((state) => state.vendor.vendors)
+
   const [isVisible, setIsVisible] = useState(show)
   const [value, setValue] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -60,9 +65,21 @@ const ModalVendor: React.FC<ModalProps> = ({ show, setShow, action }) => {
       return
     }
     try {
-      if (action.type === 'Добавить') createVendor(value)
-      if (action.type === 'Изменить') changeVendor(value, action.id)
-      if (action.type === 'Удалить') deleteVendor(action.id)
+      if (action.type === 'Добавить') {
+        const lastID = vendors[vendors.length - 1].id
+        const newID = lastID + 1
+        console.log({ id: newID, name: value })
+        createVendor(value)
+        dispatch(addVendor({ id: newID, name: value }))
+      }
+      if (action.type === 'Изменить') {
+        changeVendor(value, action.id)
+        dispatch(updateVendor({ id: action.id, name: value }))
+      }
+      if (action.type === 'Удалить') {
+        deleteVendor(action.id)
+        dispatch(removeVendor({ id: action.id }))
+      }
 
       setValue('')
       setError(null)

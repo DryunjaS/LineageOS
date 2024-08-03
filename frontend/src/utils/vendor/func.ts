@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { VendorType } from '../../interfaces/vendor'
-
 export async function getVendors() {
   const { data } = await axios.get(
     `${import.meta.env.VITE_URL_SERVER}/vendor/get-vendors`,
@@ -9,9 +8,12 @@ export async function getVendors() {
   return data
 }
 export async function createVendor(vendorName: string) {
+  console.log(vendorName)
+
   if (vendorName.trim().length) {
     const newVendor = {
-      name: vendorName,
+      id: 1,
+      name: vendorName.trim(),
     }
     await axios.post(
       `${import.meta.env.VITE_URL_SERVER}/vendor/create-vendor`,

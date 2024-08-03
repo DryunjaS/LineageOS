@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import NavDevice from '../components/NavDevice'
 import { useParams } from 'react-router-dom'
+import ModalChangeDevice from '../components/Modals/ModalChangeDevice'
 
 const ItemADMIN = () => {
   const [showNavBar, setShowNavBar] = useState(true)
@@ -27,6 +28,12 @@ const ItemADMIN = () => {
   const handleChange = (field: string) => {}
   return (
     <div className="flex min-h-screen flex-col">
+      {/* <ModalChangeDevice
+        show={show}
+        setShow={setShow}
+        field={field}
+        vendorDevice={vendorDevice}
+      /> */}
       <div
         className={`fixed left-0 top-0 w-full bg-white transition-transform duration-300 ${
           showNavBar ? 'translate-y-0 transform' : '-translate-y-full transform'
