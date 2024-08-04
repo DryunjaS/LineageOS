@@ -106,14 +106,18 @@ const DevicesPage = () => {
                     ▲ На верх
                   </a>
                   <div className="grid grid-cols-1 gap-y-4 scr350:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                    {group.devices.map((device, deviceIndex) => (
+                    {group.devices.map((device) => (
                       <DevicePreview
-                        key={deviceIndex}
+                        idDevice={device.id}
                         code={device.name.Code}
                         model={device.name.Model}
                       />
                     ))}
-                    <DevicePreview code={'Другое'} model={'Другое'} />
+                    <DevicePreview
+                      code={'Другое'}
+                      model={'Другое'}
+                      idDevice={1}
+                    />
                   </div>
                 </div>
               </div>

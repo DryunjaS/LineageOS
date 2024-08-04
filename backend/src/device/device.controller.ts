@@ -14,6 +14,11 @@ import { DeviceService } from './device.service';
 export class DeviceController {
   constructor(private readonly deviceService: DeviceService) {}
 
+  @Get('/get-device/:id')
+  async getDeviceById(@Param('id') id: number): Promise<Device> {
+    return this.deviceService.getDeviceById(id);
+  }
+
   @Get('/get-devices-group-vendor')
   async getDevicesGroupedByVendor() {
     return this.deviceService.getDevicesGroupedByVendor();

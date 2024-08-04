@@ -13,6 +13,23 @@ export class DeviceService {
     private vendorRepository: Repository<Vendor>,
   ) {}
 
+  async getDeviceById(id: number): Promise<Device> {
+    try {
+      const device = await this.deviceRepository.findOne({
+        where: { id },
+        relations: ['vendor'], // добавляем связь с таблицей vendor
+      });
+
+      if (!device) {
+        throw new Error('Device not found');
+      }
+
+      return device;
+    } catch (error) {
+      throw new Error(`Failed to get device: ${error.message}`);
+    }
+  }
+
   async getDevicesGroupedByVendor(): Promise<any> {
     const vendors = await this.vendorRepository.find({
       relations: ['devices'],
@@ -28,8 +45,6 @@ export class DeviceService {
   }
 
   async createDevice(deviceData: Partial<Device>): Promise<Device> {
-    console.log(deviceData);
-
     if (!deviceData.vendor || !deviceData.vendor.id) {
       throw new NotFoundException('Vendor not found');
     }

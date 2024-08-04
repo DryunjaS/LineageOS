@@ -1,6 +1,29 @@
-const DevicePreview = ({ code, model }: { code: string; model: string }) => {
+import { useDispatch, useSelector } from 'react-redux'
+import { setCurrentDevice } from '../store/deviceSlice'
+
+const DevicePreview = ({
+  idDevice,
+  code,
+  model,
+}: {
+  idDevice: number | null
+  code: string
+  model: string
+}) => {
+  const dispatch = useDispatch()
+
+  const handleDevice = () => {
+    const currentDevice = {
+      id: idDevice,
+      name: {
+        Model: model,
+        Code: code,
+      },
+    }
+    sessionStorage.setItem('tmp', `${idDevice}`)
+  }
   return (
-    <div className="bg-[#f6fafa]">
+    <div className="bg-[#f6fafa]" onClick={handleDevice}>
       <a
         href={`/devices/${code === 'Другое' ? 'unknown' : code}`}
         className="mx-auto flex h-[220px] w-auto flex-col items-center justify-center p-8 scr350:h-[150px] scr350:w-[180px]"

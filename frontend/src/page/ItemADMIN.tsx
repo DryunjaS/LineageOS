@@ -2,11 +2,25 @@ import { useEffect, useState } from 'react'
 import NavDevice from '../components/NavDevice'
 import { useParams } from 'react-router-dom'
 import ModalChangeDevice from '../components/Modals/ModalChangeDevice'
+import WriteIcon from '../components/icons/Write'
+import { getDeviceByID } from '../utils/device/func'
+import { InfoDevice, NameDevice, SpecificDevice } from '../interfaces/device'
 
+interface DeviceType {
+  id: number
+  name: NameDevice
+  info: InfoDevice
+  specific: SpecificDevice
+}
 const ItemADMIN = () => {
   const [showNavBar, setShowNavBar] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+
+  const [showModalChange, setShowModalChange] = useState(false)
+
   const { device } = useParams()
+  const [data, setData] = useState<DeviceType>()
+  const [field, setField] = useState('')
 
   const handleScroll = () => {
     const currentScrollY = window.scrollY
@@ -25,17 +39,32 @@ const ItemADMIN = () => {
     }
   }, [lastScrollY])
 
-  const handleChange = (field: string) => {}
+  useEffect(() => {
+    const id = Number(sessionStorage.getItem('tmp'))
+    getDeviceByID(id)
+      .then((response) => {
+        setData(response)
+        console.log(response)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }, [])
+
+  const changeFieldDevice = (field: string) => {
+    setShowModalChange(true)
+    setField(field)
+  }
   return (
     <div className="flex min-h-screen flex-col">
-      {/* <ModalChangeDevice
-        show={show}
-        setShow={setShow}
+      <ModalChangeDevice
+        show={showModalChange}
+        setShow={setShowModalChange}
+        data={data}
         field={field}
-        vendorDevice={vendorDevice}
-      /> */}
+      />
       <div
-        className={`fixed left-0 top-0 w-full bg-white transition-transform duration-300 ${
+        className={`fixed left-0 top-0 z-10 w-full bg-white transition-transform duration-300 ${
           showNavBar ? 'translate-y-0 transform' : '-translate-y-full transform'
         }`}
       >
@@ -67,109 +96,116 @@ const ItemADMIN = () => {
                 </span>
                 <span className="underline-on-hover">Devices</span>
               </a>
-              <h1 className="text-5xl font-light text-[#555555]">{device}</h1>
-              <h3 className="text-xl text-[#555555]">G</h3>
+              <h1 className="text-5xl font-light text-[#555555]">
+                {data?.name.Model}
+              </h1>
+              <h3 className="text-xl text-[#555555]">{data?.name.Code}</h3>
             </div>
 
             <div className="mb-6 space-y-3">
               <div className="flex items-center gap-x-2">
-                <h2 className="device-title">Downloads</h2>
+                <h2 className="device-title">Загрузки</h2>
                 <span
                   className="cursor-pointer py-1"
-                  onClick={() => handleChange('Downloads')}
+                  onClick={() => changeFieldDevice('Загрузки')}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="size-5"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                    />
-                  </svg>
+                  <WriteIcon />
                 </span>
               </div>
 
               <div className="text-md underline-on-hover w-max cursor-pointer text-primary">
-                Get the builds here
+                {data?.info.Downloads}
               </div>
             </div>
 
             <div className="mb-6 space-y-3">
-              <h2 className="device-title">Guides</h2>
+              <div className="flex items-center gap-x-2">
+                <h2 className="device-title">Руководства</h2>
+                <span
+                  className="cursor-pointer py-1"
+                  onClick={() => changeFieldDevice('Руководства')}
+                >
+                  <WriteIcon />
+                </span>
+              </div>
+
               <ul className="text-md flex list-disc flex-col pl-10 text-primary">
-                <li className="underline-on-hover cursor-pointer break-words sm:w-max">
-                  Installation
-                </li>
-                <li className="underline-on-hover cursor-pointer break-words sm:w-max">
-                  Build for yourself
-                </li>
-                <li className="underline-on-hover cursor-pointer break-words sm:w-max">
-                  Update to a newer build of the same LineageOS version
-                </li>
+                {data?.info.Guides.map((li, index) => (
+                  <li
+                    key={index}
+                    className="underline-on-hover cursor-pointer break-words sm:w-max"
+                  >
+                    {li}
+                  </li>
+                ))}
               </ul>
             </div>
 
             <div className="mb-6 space-y-3">
-              <h2 className="device-title">Special boot modes</h2>
+              <div className="flex items-center gap-x-2">
+                <h2 className="device-title">Специальные режимы загрузки</h2>
+                <span
+                  className="cursor-pointer py-1"
+                  onClick={() =>
+                    changeFieldDevice('Специальные режимы загрузки')
+                  }
+                >
+                  <WriteIcon />
+                </span>
+              </div>
               <ul className="list-disc space-y-2 pl-10 font-light">
-                <li>
-                  <b>Recovery:</b> With the device powered off, hold{' '}
-                  <kbd className="rounded-md bg-[#212529] px-[0.4rem] py-[0.3rem] text-sm text-white">
-                    Volume Up
-                  </kbd>{' '}
-                  +{' '}
-                  <kbd className="rounded-md bg-[#212529] px-[0.4rem] py-[0.3rem] text-sm text-white">
-                    Power
-                  </kbd>
-                  .
-                </li>
-                <li>
-                  <b>Bootloader/Fastboot/Download:</b> Our device doesn’t have
-                  button mapping for bootloader, thus instead reboot to
-                  bootloader from recovery.
-                </li>
+                {data?.info.Special_boot_modes.map((li, index) => (
+                  <li key={index}>{li}</li>
+                ))}
               </ul>
             </div>
 
             <div className="mb-6 space-y-3">
-              <h2 className="device-title">Known quirks</h2>
+              <div className="flex items-center gap-x-2">
+                <h2 className="device-title">Известные причуды</h2>
+                <span
+                  className="cursor-pointer py-1"
+                  onClick={() => changeFieldDevice('Известные причуды')}
+                >
+                  <WriteIcon />
+                </span>
+              </div>
               <ul className="list-disc space-y-2 pl-10 font-light">
-                <li className="underline-on-hover w-max cursor-pointer text-primary">
-                  Device integrity
-                </li>
+                {data?.info.Known_quirks.map((li, index) => (
+                  <li
+                    key={index}
+                    className="underline-on-hover w-max cursor-pointer text-primary"
+                  >
+                    {li}
+                  </li>
+                ))}
               </ul>
             </div>
 
             <div className="mb-6 space-y-3">
-              <h2 className="device-title">Find help online</h2>
-              <p className="font-light">
-                You can find assistance with LineageOS on{' '}
-                <span className="underline-on-hover w-max cursor-pointer text-primary">
-                  our subreddit
+              <div className="flex items-center gap-x-2">
+                <h2 className="device-title">Найти справку в Интернете</h2>
+                <span
+                  className="cursor-pointer py-1"
+                  onClick={() => changeFieldDevice('Найти справку в Интернете')}
+                >
+                  <WriteIcon />
                 </span>
-                , or in
-                <span className="underline-on-hover w-max cursor-pointer text-primary">
-                  #LineageOS on Libera.Chat
-                </span>
-                .
-              </p>
+              </div>
+              <p className="font-light">{data?.info.Find_help_online}</p>
             </div>
 
             <div className="mb-6 space-y-3">
-              <h2 className="device-title">Report a bug</h2>
-              <p className="font-light">
-                If you’d like to report a bug, follow the instructions{' '}
-                <span className="underline-on-hover w-max cursor-pointer text-primary">
-                  here
+              <div className="flex items-center gap-x-2">
+                <h2 className="device-title">Сообщить об ошибке</h2>
+                <span
+                  className="cursor-pointer py-1"
+                  onClick={() => changeFieldDevice('Сообщить об ошибке')}
+                >
+                  <WriteIcon />
                 </span>
-                .
-              </p>
+              </div>
+              <p className="font-light">{data?.info.Report_a_bug}</p>
             </div>
           </div>
           <div className="px-2 lg:w-4/12">

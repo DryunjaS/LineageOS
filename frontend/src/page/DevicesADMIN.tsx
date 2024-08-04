@@ -17,6 +17,7 @@ import PlusIcon from '../components/icons/Plus'
 import ModalDevice from '../components/Modals/ModalDevice'
 import { useDispatch, useSelector } from 'react-redux'
 import { setVendors } from '../store/vendorSlice'
+import { RootState } from '../store'
 
 interface DevicesGroupItemType {
   id: number | null
@@ -30,7 +31,7 @@ export interface DevicesGroupType {
 }
 const DevicesADMIN = () => {
   const dispatch = useDispatch()
-  const vendors = useSelector((state) => state.vendor.vendors)
+  const vendors = useSelector((state: RootState) => state.vendor.vendors)
 
   const [showNavBar, setShowNavBar] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
@@ -76,7 +77,6 @@ const DevicesADMIN = () => {
     getDevicesGroupedByVendor()
       .then((response) => {
         dispatch(setVendors(response))
-        console.log(response)
       })
       .catch((err) => {
         console.log(err)
@@ -236,7 +236,7 @@ const DevicesADMIN = () => {
                     {group.devices.map((device) => (
                       <div className="relative">
                         <DevicePreview
-                          key={device.id}
+                          idDevice={device.id}
                           code={device.name.Code}
                           model={device.name.Model}
                         />
@@ -265,7 +265,11 @@ const DevicesADMIN = () => {
                         </span>
                       </div>
                     ))}
-                    <DevicePreview code={'Другое'} model={'Другое'} />
+                    <DevicePreview
+                      code={'Другое'}
+                      model={'Другое'}
+                      idDevice={123}
+                    />
                     <div
                       className="mx-auto mt-10 flex aspect-square w-20 cursor-pointer items-center justify-center rounded-lg bg-primary text-white transition-transform duration-200 hover:scale-110"
                       title="Добавить устройство"

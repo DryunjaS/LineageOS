@@ -1,5 +1,3 @@
-import { VendorType } from './vendor'
-
 export interface NameDevice {
   Model: string
   Code: string
@@ -21,8 +19,14 @@ export interface SpecificDevice {
 }
 
 export interface DeviceType {
-  Name: NameDevice
-  Info: InfoDevice
-  Specific: SpecificDevice
-  vendor: VendorType
+  id: number
+  name: NameDevice
+  info: InfoDevice
+  specific: SpecificDevice
+  vendor: number
+}
+
+export interface deviceInfoType {
+  name: NameDevice | undefined
+  field: string
 }
