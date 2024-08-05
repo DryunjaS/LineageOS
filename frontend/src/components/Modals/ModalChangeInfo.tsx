@@ -10,7 +10,7 @@ interface ModalProps {
   field: string
 }
 
-const ModalChangeDevice: React.FC<ModalProps> = ({
+const ModalChangeInfo: React.FC<ModalProps> = ({
   show,
   setShow,
   data,
@@ -114,7 +114,8 @@ const ModalChangeDevice: React.FC<ModalProps> = ({
     if (fieldKey) {
       const updatedInfo = { ...info }
       if (fieldsToList.includes(field)) {
-        updatedInfo[fieldKey] = inputValue
+        // Filter out empty strings from inputValue
+        updatedInfo[fieldKey] = inputValue.filter((item) => item.trim() !== '')
       } else {
         updatedInfo[fieldKey] = inputValue[0] || ''
       }
@@ -151,7 +152,10 @@ const ModalChangeDevice: React.FC<ModalProps> = ({
   }
 
   const handleAddInput = () => {
-    setInputValue([...inputValue, ''])
+    // Only add a new input if there are no empty strings
+    if (inputValue.every((item) => item.trim() !== '')) {
+      setInputValue([...inputValue, ''])
+    }
   }
 
   return (
@@ -231,4 +235,4 @@ const ModalChangeDevice: React.FC<ModalProps> = ({
   )
 }
 
-export default ModalChangeDevice
+export default ModalChangeInfo

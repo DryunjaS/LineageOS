@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import NavDevice from '../components/NavDevice'
 import { useParams } from 'react-router-dom'
-import ModalChangeDevice from '../components/Modals/ModalChangeDevice'
 import WriteIcon from '../components/icons/Write'
 import { getDeviceByID } from '../utils/device/func'
 import { InfoDevice, NameDevice, SpecificDevice } from '../interfaces/device'
+import PlusIcon from '../components/icons/Plus'
+import ModalChangeInfo from '../components/Modals/ModalChangeInfo'
+import ModalChangeSpec from '../components/Modals/ModelChangeSpec'
 
 interface DeviceType {
   id: number
@@ -16,7 +18,8 @@ const ItemADMIN = () => {
   const [showNavBar, setShowNavBar] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
 
-  const [showModalChange, setShowModalChange] = useState(false)
+  const [showModalInfo, setShowModalInfo] = useState(false)
+  const [showModalSpec, setShowModalSpec] = useState(false)
 
   const { device } = useParams()
   const [data, setData] = useState<DeviceType>()
@@ -49,17 +52,27 @@ const ItemADMIN = () => {
       .catch((err) => {
         console.log(err)
       })
-  }, [])
+  }, [showModalInfo, showModalSpec])
 
-  const changeFieldDevice = (field: string) => {
-    setShowModalChange(true)
+  const changeFieldInfo = (field: string) => {
+    setShowModalInfo(true)
+    setField(field)
+  }
+  const changeFieldSpec = (field: string) => {
+    setShowModalSpec(true)
     setField(field)
   }
   return (
     <div className="flex min-h-screen flex-col">
-      <ModalChangeDevice
-        show={showModalChange}
-        setShow={setShowModalChange}
+      <ModalChangeSpec
+        show={showModalSpec}
+        setShow={setShowModalSpec}
+        data={data}
+        field={field}
+      />
+      <ModalChangeInfo
+        show={showModalInfo}
+        setShow={setShowModalInfo}
         data={data}
         field={field}
       />
@@ -107,7 +120,7 @@ const ItemADMIN = () => {
                 <h2 className="device-title">Загрузки</h2>
                 <span
                   className="cursor-pointer py-1"
-                  onClick={() => changeFieldDevice('Загрузки')}
+                  onClick={() => changeFieldInfo('Загрузки')}
                 >
                   <WriteIcon />
                 </span>
@@ -123,7 +136,7 @@ const ItemADMIN = () => {
                 <h2 className="device-title">Руководства</h2>
                 <span
                   className="cursor-pointer py-1"
-                  onClick={() => changeFieldDevice('Руководства')}
+                  onClick={() => changeFieldInfo('Руководства')}
                 >
                   <WriteIcon />
                 </span>
@@ -146,9 +159,7 @@ const ItemADMIN = () => {
                 <h2 className="device-title">Специальные режимы загрузки</h2>
                 <span
                   className="cursor-pointer py-1"
-                  onClick={() =>
-                    changeFieldDevice('Специальные режимы загрузки')
-                  }
+                  onClick={() => changeFieldInfo('Специальные режимы загрузки')}
                 >
                   <WriteIcon />
                 </span>
@@ -165,7 +176,7 @@ const ItemADMIN = () => {
                 <h2 className="device-title">Известные причуды</h2>
                 <span
                   className="cursor-pointer py-1"
-                  onClick={() => changeFieldDevice('Известные причуды')}
+                  onClick={() => changeFieldInfo('Известные причуды')}
                 >
                   <WriteIcon />
                 </span>
@@ -187,7 +198,7 @@ const ItemADMIN = () => {
                 <h2 className="device-title">Найти справку в Интернете</h2>
                 <span
                   className="cursor-pointer py-1"
-                  onClick={() => changeFieldDevice('Найти справку в Интернете')}
+                  onClick={() => changeFieldInfo('Найти справку в Интернете')}
                 >
                   <WriteIcon />
                 </span>
@@ -200,7 +211,7 @@ const ItemADMIN = () => {
                 <h2 className="device-title">Сообщить об ошибке</h2>
                 <span
                   className="cursor-pointer py-1"
-                  onClick={() => changeFieldDevice('Сообщить об ошибке')}
+                  onClick={() => changeFieldInfo('Сообщить об ошибке')}
                 >
                   <WriteIcon />
                 </span>
@@ -218,181 +229,167 @@ const ItemADMIN = () => {
                 />
                 <span>{device}</span>
               </div>
-              <section className="mt-4 flex items-center justify-between border-t py-3">
-                <div className="font-bold">Released</div>
-                <div className="font-light">October 03, 2017</div>
-              </section>
-              <section className="flex h-[50px] items-center justify-center border-t">
-                <div className="font-bold">Specifications</div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">SoC</div>
-                <div className="ml-auto text-end font-light">
-                  Qualcomm MSM8953 Pro <br />
-                  Snapdragon 626
-                </div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">RAM</div>
-                <div className="font-light">3/4 GB</div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">CPU</div>
-                <div className="ml-auto text-end font-light">
-                  Octa-core Cortex-A53 <br />8 x 2.2 GHz
-                </div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Architecture</div>
-                <div className="font-light">arm64</div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">GPU</div>
-                <div className="font-light">Qualcomm Adreno 506</div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Network</div>
-                <div className="font-light">
-                  <ul className="list-disc">
-                    <li>2G GSM</li>
-                    <li>3G UMTS</li>
-                    <li>4G LTE</li>
-                  </ul>
-                </div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Storage</div>
-                <div className="font-light">32/64 GB</div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">SD card </div>
-                <div className="ml-auto text-end font-light">
-                  Up to 128 GB
-                  <br />
-                  hybrid SIM slot
-                </div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Screen</div>
-                <div className="ml-auto text-end font-light">
-                  5.5 in (139.7 mm)
-                  <br />
-                  1920x1080 (400 PPI)
-                  <br />
-                  IPS LCD
-                </div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Bluetooth</div>
-                <div className="font-light">4.2</div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Wi-Fi</div>
-                <div className="font-light">802.11 b/g/n</div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Peripherals</div>
-                <div className="font-light">
-                  <ul className="list-disc">
-                    <li>GPS</li>
-                    <li>Accelerometer</li>
-                    <li>Dual SIM</li>
-                    <li>Dual speakers</li>
-                    <li>Fingerprint reader</li>
-                    <li>Gyroscope</li>
-                    <li>Light sensor</li>
-                    <li>USB OTG</li>
-                  </ul>
-                </div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Cameras</div>
-                <div className="w-1/2 font-light">
-                  <ul className="list-disc">
-                    <li>13 MP (Rear), Dual LED (dual tone) flash</li>
-                    <li>13 MP (Monochrome sensor), No flash</li>
-                    <li>16 MP (Front), LED flash</li>
-                  </ul>
-                </div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Dimensions</div>
-                <div className="ml-auto text-end font-light">
-                  155 mm (6.1 in) (h)
-                  <br />
-                  76 mm (2.99 in) (w)
-                  <br />
-                  9.0 mm (0.35 in) (d)
-                </div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Battery</div>
-                <div className="ml-auto text-end font-light">
-                  Non-removable Li-Ion 4000
-                  <br />
-                  mAh
-                </div>
-              </section>
-              <section className="flex h-[50px] items-center justify-center border-t">
-                <div className="font-bold">LineageOS info</div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Maintainer</div>
-                <div className="w-1/2 font-light">
-                  <ul className="list-disc">
-                    <li>kardebayan</li>
-                  </ul>
-                </div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Current version</div>
-                <div className="w-1/2 font-light">
-                  <ul className="list-disc">
-                    <li>20 (Android 13)</li>
-                  </ul>
-                </div>
-              </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Kernel version</div>
-                <div className="w-1/2 font-light">
-                  <ul className="list-disc">
-                    <li>
-                      4.9 (
-                      <span className="underline-on-hover w-max cursor-pointer font-bold text-primary">
-                        source code
+              {data?.specific?.Main &&
+              Object.keys(data?.specific?.Main).length > 0 ? (
+                Object.entries(data?.specific?.Main).map(([key, value]) => (
+                  <section
+                    key={key}
+                    className="flex items-center justify-between gap-x-3 border-t py-3"
+                  >
+                    <div className="flex w-1/2 items-center gap-x-2">
+                      <span
+                        className="cursor-pointer py-1"
+                        onClick={() => changeFieldSpec(`${key} Main`)}
+                      >
+                        <WriteIcon />
                       </span>
-                      )
-                    </li>
-                  </ul>
+                      <div className="font-bold">{key}</div>
+                    </div>
+                    <div className="w-1/2 pr-3 text-end font-light">
+                      {Array.isArray(value) ? (
+                        value.length === 1 ? (
+                          value[0]
+                        ) : (
+                          <ul>
+                            {value.map((item, index) => (
+                              <li key={index} className="ml-5 list-disc">
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        )
+                      ) : (
+                        value
+                      )}
+                    </div>
+                  </section>
+                ))
+              ) : (
+                <section className="flex items-center justify-center border-t py-3">
+                  <div className="font-light">Нет доступных данных</div>
+                </section>
+              )}
+              <section className="flex items-center justify-center border-t py-3">
+                <div
+                  className="mx-auto my-1 flex aspect-square w-8 cursor-pointer items-center justify-center rounded-md bg-primary text-white transition-transform duration-200 hover:scale-110"
+                  title="Добавить пункт"
+                  onClick={() => changeFieldSpec('Новый Main')}
+                >
+                  <PlusIcon />
                 </div>
               </section>
-              <section className="flex items-center justify-between border-t py-3">
-                <div className="font-bold">Supported models</div>
-                <div className="w-1/2 font-light">
-                  <ul className="list-disc">
-                    <li>G</li>
-                    <li className="font-bold">
-                      <div className="justify-endgap-2 relative flex items-center text-primary">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="absolute -left-[6px] top-0 h-6 w-6"
+
+              <section className="flex h-[50px] items-center justify-center border-t">
+                <div className="font-bold">Технические характеристики</div>
+              </section>
+              {data?.specific?.Specifications &&
+              Object.keys(data?.specific?.Specifications).length > 0 ? (
+                Object.entries(data?.specific?.Specifications).map(
+                  ([key, value]) => (
+                    <section
+                      key={key}
+                      className="flex items-center justify-between gap-x-3 border-t py-3"
+                    >
+                      <div className="flex w-1/2 items-center gap-x-2">
+                        <span
+                          className="cursor-pointer py-1"
+                          onClick={() =>
+                            changeFieldSpec(`${key} Specifications`)
+                          }
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"
-                          />
-                        </svg>
-                        <span className="underline-on-hover ml-5 cursor-pointer">
-                          Don't see yours?
+                          <WriteIcon />
                         </span>
+                        <div className="font-bold">{key}</div>
                       </div>
-                    </li>
-                  </ul>
+                      <div className="w-1/2 pr-3 text-end font-light">
+                        {Array.isArray(value) ? (
+                          value.length === 1 ? (
+                            value[0]
+                          ) : (
+                            <ul>
+                              {value.map((item, index) => (
+                                <li key={index} className="ml-5 list-disc">
+                                  {item}
+                                </li>
+                              ))}
+                            </ul>
+                          )
+                        ) : (
+                          value
+                        )}
+                      </div>
+                    </section>
+                  ),
+                )
+              ) : (
+                <section className="flex items-center justify-center border-t py-3">
+                  <div className="font-light">Нет доступных данных</div>
+                </section>
+              )}
+
+              <section className="flex items-center justify-center border-t py-3">
+                <div
+                  className="mx-auto my-1 flex aspect-square w-8 cursor-pointer items-center justify-center rounded-md bg-primary text-white transition-transform duration-200 hover:scale-110"
+                  title="Добавить пункт"
+                  onClick={() => changeFieldSpec('Новый Specifications')}
+                >
+                  <PlusIcon />
+                </div>
+              </section>
+              <section className="flex h-[50px] items-center justify-center border-t">
+                <div className="font-bold">Информация о LineageOS</div>
+              </section>
+              {data?.specific?.LineageOS_info &&
+              Object.keys(data?.specific?.LineageOS_info).length > 0 ? (
+                Object.entries(data?.specific?.LineageOS_info).map(
+                  ([key, value]) => (
+                    <section
+                      key={key}
+                      className="flex items-center justify-between gap-x-3 border-t py-3"
+                    >
+                      <div className="flex w-1/2 items-center gap-x-2">
+                        <span
+                          className="cursor-pointer py-1"
+                          onClick={() =>
+                            changeFieldSpec(`${key} LineageOS_info`)
+                          }
+                        >
+                          <WriteIcon />
+                        </span>
+                        <div className="font-bold">{key}</div>
+                      </div>
+                      <div className="w-1/2 pr-3 text-end font-light">
+                        {Array.isArray(value) ? (
+                          value.length === 1 ? (
+                            value[0]
+                          ) : (
+                            <ul>
+                              {value.map((item, index) => (
+                                <li key={index} className="ml-5 list-disc">
+                                  {item}
+                                </li>
+                              ))}
+                            </ul>
+                          )
+                        ) : (
+                          value
+                        )}
+                      </div>
+                    </section>
+                  ),
+                )
+              ) : (
+                <section className="flex items-center justify-center border-t py-3">
+                  <div className="font-light">Нет доступных данных</div>
+                </section>
+              )}
+              <section className="flex items-center justify-center border-t py-3">
+                <div
+                  className="mx-auto my-1 flex aspect-square w-8 cursor-pointer items-center justify-center rounded-md bg-primary text-white transition-transform duration-200 hover:scale-110"
+                  title="Добавить пункт"
+                  onClick={() => changeFieldSpec('Новый LineageOS_info')}
+                >
+                  <PlusIcon />
                 </div>
               </section>
             </div>
