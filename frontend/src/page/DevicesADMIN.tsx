@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import NavDevice from '../components/NavDevice'
 import Modal from '../components/Modals/Modal'
-import { getVendors } from '../utils/vendor/func'
 import ModalVendor from '../components/Modals/ModalVendor'
 import {
   ActionDeviceType,
@@ -237,8 +236,7 @@ const DevicesADMIN = () => {
                       <div className="relative">
                         <DevicePreview
                           idDevice={device.id}
-                          code={device.name.Code}
-                          model={device.name.Model}
+                          deviceName={device.name}
                         />
                         <span
                           className="absolute left-2 top-2 cursor-pointer rounded-md p-1 hover:bg-primary hover:text-white"
@@ -265,10 +263,14 @@ const DevicesADMIN = () => {
                         </span>
                       </div>
                     ))}
+
                     <DevicePreview
-                      code={'Другое'}
-                      model={'Другое'}
                       idDevice={123}
+                      deviceName={{
+                        Code: 'Другое',
+                        Model: 'Другое',
+                        Img: '',
+                      }}
                     />
                     <div
                       className="mx-auto mt-10 flex aspect-square w-20 cursor-pointer items-center justify-center rounded-lg bg-primary text-white transition-transform duration-200 hover:scale-110"
@@ -305,12 +307,12 @@ const DevicesADMIN = () => {
           </div>
           <div className="mb-4 lg:mb-0">
             <p className="font-light">
-              Licensed under
+              Лицензированный в соответствии с{' '}
               <a href="#" className="text-primary">
                 CC BY-SA 3.0.
               </a>
               <br />
-              Site last generated: Jul 17, 2024
+              Дата последнего создания сайта: 17 июля 2024 г.{' '}
             </p>
           </div>
         </div>

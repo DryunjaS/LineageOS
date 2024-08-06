@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import NavDevice from '../components/NavDevice'
 import { useParams } from 'react-router-dom'
 import WriteIcon from '../components/icons/Write'
-import { getDeviceByID } from '../utils/device/func'
+import { getDeviceByID, uploadImgDevice } from '../utils/device/func'
 import { InfoDevice, NameDevice, SpecificDevice } from '../interfaces/device'
 import PlusIcon from '../components/icons/Plus'
 import ModalChangeInfo from '../components/Modals/ModalChangeInfo'
@@ -47,7 +47,6 @@ const ItemADMIN = () => {
     getDeviceByID(id)
       .then((response) => {
         setData(response)
-        console.log(response)
       })
       .catch((err) => {
         console.log(err)
@@ -61,6 +60,13 @@ const ItemADMIN = () => {
   const changeFieldSpec = (field: string) => {
     setShowModalSpec(true)
     setField(field)
+  }
+  const changeImg = async (event) => {
+    const file = event.target.files[0]
+    const id = Number(sessionStorage.getItem('tmp'))
+
+    await uploadImgDevice(file, id)
+    console.log(file)
   }
   return (
     <div className="flex min-h-screen flex-col">
@@ -107,7 +113,7 @@ const ItemADMIN = () => {
                     />
                   </svg>
                 </span>
-                <span className="underline-on-hover">Devices</span>
+                <span className="underline-on-hover">Устройства</span>
               </a>
               <h1 className="text-5xl font-light text-[#555555]">
                 {data?.name.Model}
@@ -219,14 +225,17 @@ const ItemADMIN = () => {
               <p className="font-light">{data?.info.Report_a_bug}</p>
             </div>
           </div>
+
           <div className="px-2 lg:w-4/12">
             <div className="mx-auto">
               <div className="flex flex-col items-center gap-y-4">
                 <img
-                  src={`/images/${device === 'Другое название' ? 'unknown' : device}.png`}
+                  src={`${import.meta.env.VITE_URL_SERVER}/images/${data?.name.Img}`}
                   alt={device}
                   className="h-auto w-[200px]"
                 />
+                <input type="file" accept="image/*" onChange={changeImg} />
+
                 <span>{device}</span>
               </div>
               {data?.specific?.Main &&
@@ -415,12 +424,12 @@ const ItemADMIN = () => {
           </div>
           <div className="mb-4 lg:mb-0">
             <p className="font-light">
-              Licensed under
+              Лицензированный в соответствии с{' '}
               <a href="#" className="text-primary">
                 CC BY-SA 3.0.
               </a>
               <br />
-              Site last generated: Jul 17, 2024
+              Дата последнего создания сайта: 17 июля 2024 г.{' '}
             </p>
           </div>
         </div>

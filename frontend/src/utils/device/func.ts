@@ -3,7 +3,6 @@ import { DevicesGroupType } from '../../page/DevicesADMIN'
 import { DeviceType } from '../../interfaces/device'
 
 export async function getDeviceByID(id: number) {
-  console.log(id)
   const { data } = await axios.get(
     `${import.meta.env.VITE_URL_SERVER}/device/get-device/${id}`,
   )
@@ -56,5 +55,20 @@ export async function changeInputDevice(changeDevice: DeviceType, id: number) {
   await axios.put(
     `${import.meta.env.VITE_URL_SERVER}/device/update-device/${id}`,
     changeDevice,
+  )
+}
+
+export async function uploadImgDevice(image: any, id: number) {
+  const formData = new FormData()
+  formData.append('image', image)
+  console.log(image)
+  await axios.post(
+    `${import.meta.env.VITE_URL_SERVER}/device/upload-img-device/${id}`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
   )
 }

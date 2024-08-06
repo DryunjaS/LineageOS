@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react'
 import NavDevice from '../components/NavDevice'
 import Modal from '../components/Modals/Modal'
-import { getVendors } from '../utils/vendor/func'
 import { getDevicesGroupedByVendor } from '../utils/device/func'
-import { VendorType } from '../interfaces/vendor'
-import { DevicesGroupType } from './DevicesADMIN'
 import DevicePreview from '../components/DevicePreview'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../store'
+import { setVendors } from '../store/vendorSlice'
 
 const DevicesPage = () => {
   const [showNavBar, setShowNavBar] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [showModal, setShowModal] = useState(false)
-  const [vendorArr, setVendorArr] = useState<VendorType[]>([])
-  const [devicesGroup, setDevicesGroup] = useState<DevicesGroupType[]>([])
+
+  const dispatch = useDispatch()
+  const vendors = useSelector((state: RootState) => state.vendor.vendors)
 
   const handleScroll = () => {
     const currentScrollY = window.scrollY
@@ -32,20 +33,9 @@ const DevicesPage = () => {
   }, [lastScrollY])
 
   useEffect(() => {
-    getVendors()
-      .then((response) => {
-        setVendorArr(response)
-        console.log(response)
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }, [])
-  useEffect(() => {
     getDevicesGroupedByVendor()
       .then((response) => {
-        setDevicesGroup(response)
-        console.log(response)
+        dispatch(setVendors(response))
       })
       .catch((err) => {
         console.log(err)
@@ -86,20 +76,22 @@ const DevicesPage = () => {
             </h2>
 
             <div className="grid grid-cols-2 gap-2 rounded-[4px] border border-[#e8e8e8] p-1 lg:grid-cols-3">
-              {vendorArr.map((vendor, index) => (
-                <div key={index} className="p-2 text-primary">
-                  <a
-                    href={`#${vendor.name}`}
-                    className="hover:border-b hover:border-primary"
-                  >
-                    {vendor.name}
-                  </a>
+              {vendors.map((vendor) => (
+                <div className="flex items-center">
+                  <div key={vendor.id} className="p-2 text-primary">
+                    <a
+                      href={`#${vendor.name}`}
+                      className="hover:border-b hover:border-primary"
+                    >
+                      {vendor.name}
+                    </a>
+                  </div>
                 </div>
               ))}
             </div>
 
-            {devicesGroup.map((group, index) => (
-              <div key={index} className="mx-auto w-[240px] scr350:w-auto">
+            {vendors.map((group) => (
+              <div key={group.id} className="mx-auto w-[240px] scr350:w-auto">
                 <div id={group.name} className="mt-14 pb-5">
                   <h2 className="mb-4 text-3xl font-light">{group.name}</h2>
                   <a href="#devices" className="mb-4 block text-primary">
@@ -107,16 +99,21 @@ const DevicesPage = () => {
                   </a>
                   <div className="grid grid-cols-1 gap-y-4 scr350:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                     {group.devices.map((device) => (
-                      <DevicePreview
-                        idDevice={device.id}
-                        code={device.name.Code}
-                        model={device.name.Model}
-                      />
+                      <div className="relative">
+                        <DevicePreview
+                          idDevice={device.id}
+                          deviceName={device.name}
+                        />
+                      </div>
                     ))}
+
                     <DevicePreview
-                      code={'Другое'}
-                      model={'Другое'}
-                      idDevice={1}
+                      idDevice={123}
+                      deviceName={{
+                        Code: 'Другое',
+                        Model: 'Другое',
+                        Img: '',
+                      }}
                     />
                   </div>
                 </div>
@@ -144,12 +141,12 @@ const DevicesPage = () => {
           </div>
           <div className="mb-4 lg:mb-0">
             <p className="font-light">
-              Licensed under
+              Лицензированный в соответствии с{' '}
               <a href="#" className="text-primary">
                 CC BY-SA 3.0.
               </a>
               <br />
-              Site last generated: Jul 17, 2024
+              Дата последнего создания сайта: 17 июля 2024 г.{' '}
             </p>
           </div>
         </div>

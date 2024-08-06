@@ -6,9 +6,16 @@ import {
   Post,
   Put,
   Body,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { Device } from './device.entity';
 import { DeviceService } from './device.service';
+import { diskStorage } from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { extname } from 'path';
+import { Multer } from 'multer'; // Импортируем типы из multer
 
 @Controller('device')
 export class DeviceController {
@@ -40,5 +47,25 @@ export class DeviceController {
   @Delete('/delete-device/:id')
   async deleteDevice(@Param('id') id: number): Promise<void> {
     return this.deviceService.deleteDevice(id);
+  }
+
+  @Post('/upload-img-device/:id')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './public/images',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = uuidv4() + extname(file.originalname);
+          callback(null, uniqueSuffix);
+        },
+      }),
+    }),
+  )
+  async uploadImage(
+    @Param('id') id: number,
+    @UploadedFile() file: Multer.File,
+  ) {
+    console.log('DFGHJKL');
+    return this.deviceService.updateDeviceImage(id, file);
   }
 }

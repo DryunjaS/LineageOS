@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Device } from './device.entity';
 import { Vendor } from 'src/vendor/vendor.entity';
+import { Multer } from 'multer';
 
 @Injectable()
 export class DeviceService {
@@ -17,7 +18,7 @@ export class DeviceService {
     try {
       const device = await this.deviceRepository.findOne({
         where: { id },
-        relations: ['vendor'], // добавляем связь с таблицей vendor
+        relations: ['vendor'],
       });
 
       if (!device) {
@@ -81,5 +82,22 @@ export class DeviceService {
     if (result.affected === 0) {
       throw new NotFoundException('Device not found');
     }
+  }
+
+  async updateDeviceImage(id: number, file: Multer.File) {
+    const device = await this.deviceRepository.findOne({
+      where: { id },
+      relations: ['vendor'],
+    });
+    if (!device) {
+      throw new NotFoundException(`Device with ID ${id} not found`);
+    }
+    device.name.Img = file.filename;
+    console.log(device.name.Img);
+    await this.deviceRepository.save(device);
+    return {
+      message: `Image for device ${id} uploaded successfully`,
+      filename: file.filename,
+    };
   }
 }

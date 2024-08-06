@@ -1,6 +1,7 @@
 export interface NameDevice {
   Model: string;
   Code: string;
+  Img: string;
 }
 
 export interface InfoDevice {
