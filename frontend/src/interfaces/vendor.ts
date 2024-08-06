@@ -15,6 +15,7 @@ export interface ActionDeviceType {
   id: number | null
   model: string
   code: string
+  img: string
 }
 
 interface Device {

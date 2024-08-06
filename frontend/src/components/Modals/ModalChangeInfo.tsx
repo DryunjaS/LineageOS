@@ -20,7 +20,7 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
   const [error, setError] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState<string[]>([''])
   const [info, setInfo] = useState<InfoDevice>({
-    Downloads: [],
+    Downloads: '',
     Guides: [],
     Special_boot_modes: [],
     Known_quirks: [],
@@ -33,12 +33,13 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
     LineageOS_info: {},
   })
 
-  const fieldsToList = [
+  const fieldsToList: string[] = [
     'Руководства',
     'Специальные режимы загрузки',
     'Известные причуды',
   ]
-  const fieldMap = {
+
+  const fieldMap: Record<string, keyof InfoDevice> = {
     Загрузки: 'Downloads',
     Руководства: 'Guides',
     'Специальные режимы загрузки': 'Special_boot_modes',
@@ -52,18 +53,8 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
       setIsVisible(true)
       document.body.classList.add('modal-open')
 
-      const fieldKey = fieldMap[field]
-      if (fieldKey) {
-        // Update inputValue based on the selected field
-        setInputValue(
-          Array.isArray(info[fieldKey])
-            ? info[fieldKey]
-            : [info[fieldKey] || ''],
-        )
-      }
-
       setInfo({
-        Downloads: data?.info.Downloads || [],
+        Downloads: data?.info.Downloads || '',
         Guides: data?.info.Guides || [],
         Special_boot_modes: data?.info.Special_boot_modes || [],
         Known_quirks: data?.info.Known_quirks || [],
@@ -75,6 +66,15 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
         Specifications: data?.specific.Specifications || {},
         LineageOS_info: data?.specific.LineageOS_info || {},
       })
+
+      const fieldKey = fieldMap[field]
+      if (fieldKey) {
+        setInputValue(
+          Array.isArray(data.info[fieldKey])
+            ? (data.info[fieldKey] as string[])
+            : [(data.info[fieldKey] as string) || ''],
+        )
+      }
     } else {
       const timeoutId = setTimeout(() => setIsVisible(false), 300)
       document.body.classList.remove('modal-open')
@@ -112,12 +112,13 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
   const handleEnter = async () => {
     const fieldKey = fieldMap[field]
     if (fieldKey) {
-      const updatedInfo = { ...info }
+      const updatedInfo = { ...info } as InfoDevice
       if (fieldsToList.includes(field)) {
-        // Filter out empty strings from inputValue
-        updatedInfo[fieldKey] = inputValue.filter((item) => item.trim() !== '')
+        ;(updatedInfo[fieldKey] as string[]) = inputValue.filter(
+          (item) => item.trim() !== '',
+        )
       } else {
-        updatedInfo[fieldKey] = inputValue[0] || ''
+        ;(updatedInfo[fieldKey] as string) = inputValue[0] || ''
       }
       setInfo(updatedInfo)
 
@@ -125,10 +126,14 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
         const DEVICE_ID = Number(sessionStorage.getItem('tmp'))
         const newDevice = {
           id: DEVICE_ID,
-          name: { Model: data.name.Model, Code: data.name.Code },
+          name: {
+            Model: data.name.Model,
+            Code: data.name.Code,
+            Img: data.name.Img,
+          },
           info: updatedInfo,
           specific: specific,
-          vendor: data.vendor.id,
+          vendor: data.vendor,
         }
 
         await changeInputDevice(newDevice, DEVICE_ID)
@@ -152,12 +157,10 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
   }
 
   const handleAddInput = () => {
-    // Only add a new input if there are no empty strings
     if (inputValue.every((item) => item.trim() !== '')) {
       setInputValue([...inputValue, ''])
     }
   }
-
   return (
     <>
       {isVisible && (
@@ -183,7 +186,7 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
                     <span>×</span>
                   </button>
                 </div>
-                {/* Body */}
+                {/* Основная часть */}
                 <div className="relative flex-auto px-6">
                   <div className="overflow-y-auto">
                     <label>Текст</label>
@@ -211,7 +214,6 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
                   </div>
                 </div>
 
-                {/* Footer */}
                 <div className="flex items-center justify-end px-6 py-3">
                   <button
                     className="w-full rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg hover:shadow-primary/50"

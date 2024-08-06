@@ -142,7 +142,7 @@ const ItemPage = () => {
             <div className="mx-auto">
               <div className="flex flex-col items-center gap-y-4">
                 <img
-                  src={`${import.meta.env.VITE_URL_SERVER}/images/${data?.name.Img}`}
+                  src={`${import.meta.env.VITE_URL_SERVER}/images/${data?.name.Img.length !== 0 ? data?.name.Img : 'unknown.png'}`}
                   alt={device}
                   className="h-auto w-[200px]"
                 />

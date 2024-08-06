@@ -7,7 +7,7 @@ interface ModalProps {
   show: boolean
   setShow: React.Dispatch<React.SetStateAction<boolean>>
   data: DeviceType
-  field: string
+  field: { key0: string; key1: string }
 }
 
 const ModalChangeSpec: React.FC<ModalProps> = ({
@@ -33,20 +33,15 @@ const ModalChangeSpec: React.FC<ModalProps> = ({
     LineageOS_info: {},
   })
 
-  const fieldsToList = [
-    'Новый Main',
-    'Новый Specifications',
-    'Новый LineageOS_info',
-  ]
+  const newItemList = 'Новый пункт'
 
   useEffect(() => {
     if (show) {
       setIsVisible(true)
       document.body.classList.add('modal-open')
 
-      const splitField = field.split(' ')
-      const key0 = splitField[0]
-      const key1 = splitField[1]
+      const key0 = field.key0
+      const key1 = field.key1
 
       if (field) {
         const previousValues = data?.specific[key1]?.[key0] || ['']
@@ -103,14 +98,13 @@ const ModalChangeSpec: React.FC<ModalProps> = ({
   }
 
   const handleEnter = async () => {
-    if (field) {
+    if (field.key1) {
       let updatedSpec = { ...specific }
 
-      const splitField = field.split(' ')
-      const key0 = splitField[0]
-      const key1 = splitField[1]
+      const key0 = field.key0
+      const key1 = field.key1
 
-      if (fieldsToList.includes(field)) {
+      if (newItemList === key0) {
         if (inputValue[0].length) {
           updatedSpec[key1] = {
             ...updatedSpec[key1],
@@ -135,12 +129,15 @@ const ModalChangeSpec: React.FC<ModalProps> = ({
         const DEVICE_ID = Number(sessionStorage.getItem('tmp'))
         const newDevice = {
           id: DEVICE_ID,
-          name: { Model: data.name.Model, Code: data.name.Code },
+          name: {
+            Model: data.name.Model,
+            Code: data.name.Code,
+            Img: data.name.Img,
+          },
           info: info,
           specific: updatedSpec,
           vendor: data.vendor.id,
         }
-        console.log(newDevice)
 
         await changeInputDevice(newDevice, DEVICE_ID)
 
@@ -185,7 +182,7 @@ const ModalChangeSpec: React.FC<ModalProps> = ({
             >
               <div className="relative flex w-[300px] flex-col rounded-lg border-0 bg-white shadow-lg outline-none focus:outline-none md:w-[400px]">
                 <div className="flex items-center justify-between p-5">
-                  <h3 className="text-3xl font-light">{field.split(' ')[0]}</h3>
+                  <h3 className="text-3xl font-light">{field.key0}</h3>
                   <button
                     className="text-4xl font-light text-[#555555]"
                     onClick={() => setShow(false)}
@@ -208,7 +205,7 @@ const ModalChangeSpec: React.FC<ModalProps> = ({
                           onChange={(e) => handleChange(e, index)}
                         />
                       ))}
-                      {!fieldsToList.includes(field) && (
+                      {newItemList !== field.key0 && (
                         <div
                           className="mx-auto my-1 flex aspect-square w-8 cursor-pointer items-center justify-center rounded-md bg-primary text-white transition-transform duration-200 hover:scale-110"
                           title="Добавить пункт"

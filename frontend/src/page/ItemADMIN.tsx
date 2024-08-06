@@ -24,6 +24,7 @@ const ItemADMIN = () => {
   const { device } = useParams()
   const [data, setData] = useState<DeviceType>()
   const [field, setField] = useState('')
+  const [fieldSpec, setFieldSpec] = useState({})
 
   const handleScroll = () => {
     const currentScrollY = window.scrollY
@@ -57,16 +58,15 @@ const ItemADMIN = () => {
     setShowModalInfo(true)
     setField(field)
   }
-  const changeFieldSpec = (field: string) => {
+  const changeFieldSpec = (key0: string, key1: string) => {
     setShowModalSpec(true)
-    setField(field)
+    setFieldSpec({ key0, key1 })
   }
   const changeImg = async (event) => {
     const file = event.target.files[0]
     const id = Number(sessionStorage.getItem('tmp'))
 
     await uploadImgDevice(file, id)
-    console.log(file)
   }
   return (
     <div className="flex min-h-screen flex-col">
@@ -74,7 +74,7 @@ const ItemADMIN = () => {
         show={showModalSpec}
         setShow={setShowModalSpec}
         data={data}
-        field={field}
+        field={fieldSpec}
       />
       <ModalChangeInfo
         show={showModalInfo}
@@ -230,7 +230,7 @@ const ItemADMIN = () => {
             <div className="mx-auto">
               <div className="flex flex-col items-center gap-y-4">
                 <img
-                  src={`${import.meta.env.VITE_URL_SERVER}/images/${data?.name.Img}`}
+                  src={`${import.meta.env.VITE_URL_SERVER}/images/${data?.name.Img.length !== 0 ? data?.name.Img : 'unknown.png'}`}
                   alt={device}
                   className="h-auto w-[200px]"
                 />
@@ -248,7 +248,7 @@ const ItemADMIN = () => {
                     <div className="flex w-1/2 items-center gap-x-2">
                       <span
                         className="cursor-pointer py-1"
-                        onClick={() => changeFieldSpec(`${key} Main`)}
+                        onClick={() => changeFieldSpec(key, 'Main')}
                       >
                         <WriteIcon />
                       </span>
@@ -282,7 +282,7 @@ const ItemADMIN = () => {
                 <div
                   className="mx-auto my-1 flex aspect-square w-8 cursor-pointer items-center justify-center rounded-md bg-primary text-white transition-transform duration-200 hover:scale-110"
                   title="Добавить пункт"
-                  onClick={() => changeFieldSpec('Новый Main')}
+                  onClick={() => changeFieldSpec('Новый пункт', 'Main')}
                 >
                   <PlusIcon />
                 </div>
@@ -302,9 +302,7 @@ const ItemADMIN = () => {
                       <div className="flex w-1/2 items-center gap-x-2">
                         <span
                           className="cursor-pointer py-1"
-                          onClick={() =>
-                            changeFieldSpec(`${key} Specifications`)
-                          }
+                          onClick={() => changeFieldSpec(key, 'Specifications')}
                         >
                           <WriteIcon />
                         </span>
@@ -340,7 +338,9 @@ const ItemADMIN = () => {
                 <div
                   className="mx-auto my-1 flex aspect-square w-8 cursor-pointer items-center justify-center rounded-md bg-primary text-white transition-transform duration-200 hover:scale-110"
                   title="Добавить пункт"
-                  onClick={() => changeFieldSpec('Новый Specifications')}
+                  onClick={() =>
+                    changeFieldSpec('Новый пункт', 'Specifications')
+                  }
                 >
                   <PlusIcon />
                 </div>
@@ -359,9 +359,7 @@ const ItemADMIN = () => {
                       <div className="flex w-1/2 items-center gap-x-2">
                         <span
                           className="cursor-pointer py-1"
-                          onClick={() =>
-                            changeFieldSpec(`${key} LineageOS_info`)
-                          }
+                          onClick={() => changeFieldSpec(key, 'LineageOS_info')}
                         >
                           <WriteIcon />
                         </span>
@@ -396,7 +394,9 @@ const ItemADMIN = () => {
                 <div
                   className="mx-auto my-1 flex aspect-square w-8 cursor-pointer items-center justify-center rounded-md bg-primary text-white transition-transform duration-200 hover:scale-110"
                   title="Добавить пункт"
-                  onClick={() => changeFieldSpec('Новый LineageOS_info')}
+                  onClick={() =>
+                    changeFieldSpec('Новый пункт', 'Specifications')
+                  }
                 >
                   <PlusIcon />
                 </div>

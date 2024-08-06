@@ -48,6 +48,7 @@ const DevicesADMIN = () => {
     id: null,
     model: '',
     code: '',
+    img: '',
     type: '',
   })
   const [vendorDevice, setVendorDevice] = useState<VendorType>({
@@ -114,6 +115,7 @@ const DevicesADMIN = () => {
       id: null,
       model: '',
       code: '',
+      img: '',
     })
   }
   const deleteDevice = (
@@ -128,6 +130,7 @@ const DevicesADMIN = () => {
       id: idVendor,
       model: lastName.Model,
       code: lastName.Code,
+      img: lastName.Img,
     })
   }
   const changeDevice = (
@@ -137,11 +140,13 @@ const DevicesADMIN = () => {
   ) => {
     setShowModalDevice(true)
     setVendorDevice({ id: vendor.id, name: vendor.name })
+    console.log(lastName)
     setActionDevice({
       type: 'Изменить',
       id: changeID,
       model: lastName.Model,
       code: lastName.Code,
+      img: lastName.Img,
     })
   }
 
@@ -244,6 +249,7 @@ const DevicesADMIN = () => {
                             deleteDevice(group.id, device.id, {
                               Model: device.name.Model,
                               Code: device.name.Code,
+                              Img: device.name.Img,
                             })
                           }
                         >

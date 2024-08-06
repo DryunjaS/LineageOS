@@ -70,6 +70,7 @@ const vendorSlice = createSlice({
       }>,
     ) {
       const { idVendor, idDevice, data } = action.payload
+
       const vendorIndex = state.vendors.findIndex(
         (vendor) => vendor.id === idVendor,
       )

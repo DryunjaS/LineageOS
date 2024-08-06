@@ -7,9 +7,8 @@ import {
   getDevicesGroupedByVendor,
 } from '../../utils/device/func'
 import { ActionDeviceType, VendorType } from '../../interfaces/vendor'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import {
-  addDevicetoVendor,
   removeDevicetoVendor,
   setVendors,
   updateDevicetoVendor,
@@ -37,9 +36,11 @@ const ModalDevice: React.FC<ModalProps> = ({
   useEffect(() => {
     if (show) {
       setIsVisible(true)
+      console.log(action)
       setDevice({
         Model: action.model,
         Code: action.code,
+        Img: action.img,
       })
       document.body.classList.add('modal-open')
     } else {
@@ -76,11 +77,10 @@ const ModalDevice: React.FC<ModalProps> = ({
   }
 
   const handleEnter = async () => {
-    if (!device.Model.trim() || !device.Code.trim()) {
+    if (!device?.Model.trim() || !device?.Code.trim()) {
       setError('Название и код не могут быть пустыми')
       return
     }
-
     const info = {
       Downloads: '',
       Guides: [],
@@ -96,10 +96,17 @@ const ModalDevice: React.FC<ModalProps> = ({
     }
 
     try {
+      const Model = device?.Model.trim()
+      const Code = device?.Code.trim()
+
       const newDevice = {
-        Name: { Model: device.Model.trim(), Code: device.Code.trim() },
-        Info: info,
-        Specific: specific,
+        name: {
+          Model,
+          Code,
+          Img: device?.Img,
+        },
+        info: info,
+        specific: specific,
         vendor: {
           id: vendorDevice.id,
           name: vendorDevice.name,
@@ -118,7 +125,7 @@ const ModalDevice: React.FC<ModalProps> = ({
           updateDevicetoVendor({
             idVendor: vendorDevice.id,
             idDevice: action.id,
-            data: newDevice.Name,
+            data: newDevice.name,
           }),
         )
       }
@@ -133,7 +140,7 @@ const ModalDevice: React.FC<ModalProps> = ({
         )
       }
 
-      setDevice({ Model: '', Code: '' })
+      setDevice({ Model: '', Code: '', Img: '' })
       setError(null)
       setShow(false)
     } catch (err) {
