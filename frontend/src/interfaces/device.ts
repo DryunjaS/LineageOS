@@ -20,7 +20,7 @@ export interface SpecificDevice {
 }
 
 export interface DeviceType {
-  id: number
+  id: number | null
   name: NameDevice
   info: InfoDevice
   specific: SpecificDevice
@@ -30,4 +30,19 @@ export interface DeviceType {
 export interface deviceInfoType {
   name: NameDevice | undefined
   field: string
+}
+
+export interface Option {
+  check: boolean
+  text: string
+}
+
+export interface Category {
+  category: string
+  options: Option[]
+}
+
+export interface IresultCheak {
+  category: string
+  optionsTrue: string[]
 }

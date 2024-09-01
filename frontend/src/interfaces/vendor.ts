@@ -1,7 +1,7 @@
 import { NameDevice } from './device'
 
 export interface VendorType {
-  id: number | null
+  id: number
   name: string
 }
 

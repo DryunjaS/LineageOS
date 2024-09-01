@@ -17,6 +17,7 @@ import ModalDevice from '../components/Modals/ModalDevice'
 import { useDispatch, useSelector } from 'react-redux'
 import { setVendors } from '../store/vendorSlice'
 import { RootState } from '../store'
+import { setFilteredDevicesCount } from '../store/deviceSlice'
 
 interface DevicesGroupItemType {
   id: number | null
@@ -24,13 +25,19 @@ interface DevicesGroupItemType {
 }
 
 export interface DevicesGroupType {
-  id: number | null
+  id: number
   name: string
   devices: DevicesGroupItemType[]
 }
 const DevicesADMIN = () => {
   const dispatch = useDispatch()
   const vendors = useSelector((state: RootState) => state.vendor.vendors)
+  const filteredDevicesCount = useSelector(
+    (state: RootState) => state.device.filteredDevicesCount,
+  )
+  const totalDevicesCount = useSelector(
+    (state: RootState) => state.device.totalDevicesCount,
+  )
 
   const [showNavBar, setShowNavBar] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
@@ -52,7 +59,7 @@ const DevicesADMIN = () => {
     type: '',
   })
   const [vendorDevice, setVendorDevice] = useState<VendorType>({
-    id: null,
+    id: 123,
     name: '',
   })
 
@@ -73,16 +80,24 @@ const DevicesADMIN = () => {
     }
   }, [lastScrollY])
 
-  useEffect(() => {
-    getDevicesGroupedByVendor()
-      .then((response) => {
-        dispatch(setVendors(response))
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }, [])
+  const resetFilter = async () => {
+    try {
+      const response = await getDevicesGroupedByVendor()
+      dispatch(setVendors(response))
+      dispatch(
+        setFilteredDevicesCount({
+          filteredDevicesCount: response.length,
+          totalDevicesCount: response.length,
+        }),
+      )
+    } catch (err) {
+      console.error('Error fetching devices:', err)
+    }
+  }
 
+  useEffect(() => {
+    resetFilter()
+  }, [])
   const addVendor = () => {
     setShowModalVendor(true)
     setActionVendor({
@@ -140,7 +155,7 @@ const DevicesADMIN = () => {
   ) => {
     setShowModalDevice(true)
     setVendorDevice({ id: vendor.id, name: vendor.name })
-    console.log(lastName)
+
     setActionDevice({
       type: 'Изменить',
       id: changeID,
@@ -165,7 +180,7 @@ const DevicesADMIN = () => {
       />
       <Modal show={showModal} setShow={setShowModal} />
       <div
-        className={`fixed left-0 top-0 w-full bg-white transition-transform duration-300 ${
+        className={`fixed left-0 top-0 z-30 w-full bg-white transition-transform duration-300 ${
           showNavBar ? 'translate-y-0 transform' : '-translate-y-full transform'
         }`}
       >
@@ -182,12 +197,23 @@ const DevicesADMIN = () => {
             Вы можете отобразить их, отключив "Скрывать снятые с производства
             устройства" в фильтрах устройств ниже:
           </p>
-          <button
-            className="rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg hover:shadow-primary/50"
-            onClick={() => setShowModal(true)}
-          >
-            Фильтр (<span>195</span> из 483 показанныx)
-          </button>
+          <div className="flex max-w-[350px] flex-wrap justify-between">
+            <button
+              className="mb-1 rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg hover:shadow-primary/50"
+              onClick={() => setShowModal(true)}
+            >
+              Фильтр (<span>{filteredDevicesCount}</span> из {totalDevicesCount}{' '}
+              показанныx)
+            </button>
+            {filteredDevicesCount !== totalDevicesCount && (
+              <button
+                className="mb-1 rounded-[0.2rem] bg-gray-500 px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg"
+                onClick={resetFilter}
+              >
+                Сбросить
+              </button>
+            )}
+          </div>
 
           <div className="mx-auto mt-5">
             <h2 className="font-light" id="devices">
@@ -311,7 +337,7 @@ const DevicesADMIN = () => {
               </b>
             </p>
           </div>
-          <div className="mb-4 lg:mb-0">
+          <div className="mb-4 text-center lg:mb-0">
             <p className="font-light">
               Лицензированный в соответствии с{' '}
               <a href="#" className="text-primary">

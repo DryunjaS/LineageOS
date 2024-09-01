@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../../store'
 import {
   changeVendor,
   createVendor,
   deleteVendor,
 } from '../../utils/vendor/func'
 import { ActionVendorType } from '../../interfaces/vendor'
-import { useDispatch, useSelector } from 'react-redux'
 import { addVendor, removeVendor, updateVendor } from '../../store/vendorSlice'
 
 interface ModalProps {
@@ -16,11 +17,13 @@ interface ModalProps {
 
 const ModalVendor: React.FC<ModalProps> = ({ show, setShow, action }) => {
   const dispatch = useDispatch()
-  const vendors = useSelector((state) => state.vendor.vendors)
+  const vendors = useSelector((state: RootState) => state.vendor.vendors)
 
   const [isVisible, setIsVisible] = useState(show)
   const [value, setValue] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false) // Состояние для обработки загрузки
+
   useEffect(() => {
     if (show) {
       setIsVisible(true)
@@ -59,25 +62,29 @@ const ModalVendor: React.FC<ModalProps> = ({ show, setShow, action }) => {
     }
   }
 
-  function handleEnter() {
+  const handleEnter = async () => {
     if (action.type !== 'Удалить' && !value.trim()) {
       setError('Название не может быть пустым')
       return
     }
+    setIsLoading(true) // Устанавливаем состояние загрузки в true перед началом запроса
     try {
+      const trimValue = value.trim()
+
       if (action.type === 'Добавить') {
-        const lastID = vendors[vendors.length - 1].id
-        const newID = lastID + 1
-        console.log({ id: newID, name: value })
-        createVendor(value)
-        dispatch(addVendor({ id: newID, name: value }))
+        const newID =
+          vendors.length && vendors[vendors.length - 1].id
+            ? vendors[vendors.length - 1].id + 1
+            : 1
+        await createVendor(trimValue) // Ожидаем завершения асинхронного запроса
+        dispatch(addVendor({ id: newID, name: trimValue }))
       }
       if (action.type === 'Изменить') {
-        changeVendor(value, action.id)
-        dispatch(updateVendor({ id: action.id, name: value }))
+        await changeVendor(trimValue, action.id)
+        dispatch(updateVendor({ id: action.id, name: trimValue }))
       }
       if (action.type === 'Удалить') {
-        deleteVendor(action.id)
+        await deleteVendor(action.id)
         dispatch(removeVendor({ id: action.id }))
       }
 
@@ -87,6 +94,8 @@ const ModalVendor: React.FC<ModalProps> = ({ show, setShow, action }) => {
     } catch (err) {
       console.error('Error creating vendor:', err)
       setError('Не удалось создать поставщика. Попробуйте снова.')
+    } finally {
+      setIsLoading(false) // Сбрасываем состояние загрузки после завершения запроса
     }
   }
 
@@ -136,6 +145,7 @@ const ModalVendor: React.FC<ModalProps> = ({ show, setShow, action }) => {
                           placeholder="Введите название ..."
                           value={value}
                           onChange={(e) => setValue(e.target.value)}
+                          disabled={isLoading} // Отключаем ввод, если идет загрузка
                         />
                         {error && <p className="mt-2 text-red-500">{error}</p>}
                       </>
@@ -146,11 +156,42 @@ const ModalVendor: React.FC<ModalProps> = ({ show, setShow, action }) => {
                 {/* Footer */}
                 <div className="flex items-center justify-end px-6 py-3">
                   <button
-                    className="w-full rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg hover:shadow-primary/50"
+                    className={`w-full rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 ${
+                      isLoading
+                        ? 'cursor-not-allowed opacity-50'
+                        : 'hover:shadow-lg hover:shadow-primary/50'
+                    }`}
                     type="button"
                     onClick={handleEnter}
+                    disabled={isLoading} // Отключаем кнопку во время загрузки
                   >
-                    {action.type}
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <svg
+                          className="mr-2 h-5 w-5 animate-spin text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          ></path>
+                        </svg>
+                        Обработка...
+                      </div>
+                    ) : (
+                      action.type
+                    )}
                   </button>
                 </div>
               </div>

@@ -28,3 +28,8 @@ export interface DeviceType {
   Specific: SpecificDevice;
   vendor: VendorType;
 }
+
+export interface IresultCheak {
+  category: string;
+  optionsTrue: string[];
+}

@@ -1,5 +1,5 @@
 import { InfoDevice, NameDevice, SpecificDevice } from 'src/interface/device';
-import { Vendor } from 'src/vendor/vendor.entity';
+import { Vendor } from 'src/modules/vendor/vendor.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,

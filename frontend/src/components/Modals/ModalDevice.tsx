@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { NameDevice } from '../../interfaces/device'
+import {
+  NameDevice,
+  DeviceType,
+  InfoDevice,
+  SpecificDevice,
+} from '../../interfaces/device'
 import {
   changeDevice,
   createDevice,
@@ -30,16 +35,20 @@ const ModalDevice: React.FC<ModalProps> = ({
   const dispatch = useDispatch()
 
   const [isVisible, setIsVisible] = useState(show)
-  const [device, setDevice] = useState<NameDevice>()
+  const [device, setDevice] = useState<NameDevice>({
+    Model: '',
+    Code: '',
+    Img: '',
+  })
   const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false) // Добавляем состояние для загрузки
 
   useEffect(() => {
     if (show) {
       setIsVisible(true)
-      console.log(action)
       setDevice({
-        Model: action.model,
-        Code: action.code,
+        Model: action.model.trim(),
+        Code: action.code.trim(),
         Img: action.img,
       })
       document.body.classList.add('modal-open')
@@ -77,11 +86,11 @@ const ModalDevice: React.FC<ModalProps> = ({
   }
 
   const handleEnter = async () => {
-    if (!device?.Model.trim() || !device?.Code.trim()) {
+    if (!device.Model.trim() || !device.Code.trim()) {
       setError('Название и код не могут быть пустыми')
       return
     }
-    const info = {
+    const info: InfoDevice = {
       Downloads: '',
       Guides: [],
       Special_boot_modes: [],
@@ -89,32 +98,38 @@ const ModalDevice: React.FC<ModalProps> = ({
       Find_help_online: '',
       Report_a_bug: '',
     }
-    const specific = {
+    const specific: SpecificDevice = {
       Main: {},
       Specifications: {},
       LineageOS_info: {},
     }
 
+    setIsLoading(true) // Устанавливаем состояние загрузки в true перед началом запроса
     try {
-      const Model = device?.Model.trim()
-      const Code = device?.Code.trim()
+      const Model = device.Model.trim()
+      const Code = device.Code.trim()
 
-      const newDevice = {
+      const newDevice: DeviceType = {
+        id: action.id,
         name: {
           Model,
           Code,
-          Img: device?.Img,
+          Img: device.Img,
         },
         info: info,
         specific: specific,
-        vendor: {
-          id: vendorDevice.id,
-          name: vendorDevice.name,
-        },
+        vendor: vendorDevice.id,
       }
 
       if (action.type === 'Добавить') {
-        await createDevice(newDevice)
+        const tmp = {
+          ...newDevice,
+          vendor: {
+            id: vendorDevice.id,
+            name: vendorDevice.name,
+          },
+        }
+        await createDevice(tmp)
         const res = await getDevicesGroupedByVendor()
         dispatch(setVendors(res))
       }
@@ -146,6 +161,8 @@ const ModalDevice: React.FC<ModalProps> = ({
     } catch (err) {
       console.error('Error handling device:', err)
       setError('Не удалось выполнить действие. Попробуйте снова.')
+    } finally {
+      setIsLoading(false) // Сбрасываем состояние загрузки после завершения запроса
     }
   }
 
@@ -195,6 +212,7 @@ const ModalDevice: React.FC<ModalProps> = ({
                           onChange={(e) =>
                             setDevice({ ...device, Model: e.target.value })
                           }
+                          disabled={isLoading} // Отключаем ввод, если идет загрузка
                         />
 
                         <label className="mt-5 block">Код</label>
@@ -206,6 +224,7 @@ const ModalDevice: React.FC<ModalProps> = ({
                           onChange={(e) =>
                             setDevice({ ...device, Code: e.target.value })
                           }
+                          disabled={isLoading} // Отключаем ввод, если идет загрузка
                         />
                         {error && <p className="text-red-500">{error}</p>}
                       </>
@@ -216,11 +235,42 @@ const ModalDevice: React.FC<ModalProps> = ({
                 {/* Footer */}
                 <div className="flex items-center justify-end px-6 py-3">
                   <button
-                    className="w-full rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg hover:shadow-primary/50"
+                    className={`w-full rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 ${
+                      isLoading
+                        ? 'cursor-not-allowed opacity-50'
+                        : 'hover:shadow-lg hover:shadow-primary/50'
+                    }`}
                     type="button"
                     onClick={handleEnter}
+                    disabled={isLoading} // Отключаем кнопку во время загрузки
                   >
-                    {action.type}
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <svg
+                          className="mr-2 h-5 w-5 animate-spin text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          ></path>
+                        </svg>
+                        Обработка...
+                      </div>
+                    ) : (
+                      action.type
+                    )}
                   </button>
                 </div>
               </div>

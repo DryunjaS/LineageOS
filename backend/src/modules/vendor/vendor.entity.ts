@@ -1,4 +1,4 @@
-import { Device } from 'src/device/device.entity';
+import { Device } from 'src/modules/device/device.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
 @Entity()

@@ -1,23 +1,18 @@
 import React, { useState, useEffect } from 'react'
+import { Category } from '../../interfaces/device'
+import { filterDevice } from '../../utils/device/func'
+import { useDispatch } from 'react-redux'
+import { setVendors } from '../../store/vendorSlice'
+import { setFilteredDevicesCount } from '../../store/deviceSlice'
 
 interface ModalProps {
   show: boolean
   setShow: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-interface Option {
-  check: boolean
-  text: string
-}
-
-interface Category {
-  category: string
-  options: Option[]
-}
-
 const initialDeviceState: Category[] = [
   {
-    category: 'Global',
+    category: 'Глобальный',
     options: [
       { check: false, text: 'Скрыть снятые с производства устройства' },
       {
@@ -27,44 +22,43 @@ const initialDeviceState: Category[] = [
     ],
   },
   {
-    category: 'Architecture',
+    category: 'Архитектура',
     options: [
       { check: false, text: 'arm' },
-      { check: true, text: 'arm64' },
+      { check: false, text: 'arm64' },
       { check: false, text: 'x86' },
       { check: false, text: 'x86_64' },
     ],
   },
   {
-    category: 'SoC vendor',
+    category: 'SoC',
     options: [
       { check: false, text: 'Amlogic' },
       { check: false, text: 'Exynos' },
-      { check: true, text: 'Intel' },
+      { check: false, text: 'Intel' },
       { check: false, text: 'Intel' },
       { check: false, text: 'Kirin' },
       { check: false, text: 'Mediatek' },
-      { check: true, text: 'OMAP' },
+      { check: false, text: 'OMAP' },
       { check: false, text: 'Snapdragon' },
       { check: false, text: 'Tegra' },
       { check: false, text: 'Tensor' },
     ],
   },
   {
-    category: 'Device type',
+    category: 'Тип устройства',
     options: [
-      { check: false, text: 'Device type' },
+      { check: false, text: 'Devkit' },
       { check: false, text: 'Handheld game console' },
-      { check: true, text: 'Foldable' },
+      { check: false, text: 'Foldable' },
       { check: false, text: 'Set top box' },
       { check: false, text: 'Phone' },
       { check: false, text: 'Phone (slider)' },
-      { check: true, text: 'Tablet' },
-      { check: false, text: 'Set top box' },
+      { check: false, text: 'Tablet' },
     ],
   },
   {
-    category: 'Networks',
+    category: 'Сеть',
     options: [
       { check: false, text: '2G GSM' },
       { check: false, text: '2G CDMA' },
@@ -85,27 +79,126 @@ const initialDeviceState: Category[] = [
       { check: false, text: '802.11 a/b/g/n/ac/ax/bx' },
     ],
   },
+  {
+    category: 'Слот для SD-карты',
+    options: [
+      { check: false, text: 'Нет' },
+      { check: false, text: 'Да' },
+    ],
+  },
+  {
+    category: 'Версии LineageOS',
+    options: [
+      { check: false, text: '13.0' },
+      { check: false, text: '14.1' },
+      { check: false, text: '15.0' },
+      { check: false, text: '16.0' },
+      { check: false, text: '17.1' },
+      { check: false, text: '18.1' },
+      { check: false, text: '19.1' },
+      { check: false, text: '20' },
+      { check: false, text: '21' },
+    ],
+  },
+  {
+    category: 'Версии ядра',
+    options: [
+      { check: false, text: '3.0' },
+      { check: false, text: '3.4' },
+      { check: false, text: '3.10' },
+      { check: false, text: '3.18' },
+      { check: false, text: '4.4' },
+      { check: false, text: '4.9' },
+      { check: false, text: '4.14' },
+      { check: false, text: '4.19' },
+      { check: false, text: '5.4' },
+      { check: false, text: '5.10' },
+      { check: false, text: '5.15' },
+      { check: false, text: '6.1' },
+      { check: false, text: '6.6' },
+    ],
+  },
 ]
 
 const Modal: React.FC<ModalProps> = ({ show, setShow }) => {
+  const dispatch = useDispatch()
+  const [isLoading, setIsLoading] = useState(false) // Добавляем состояние для загрузки
+
   const [isVisible, setIsVisible] = useState(show)
   const [device, setDevice] = useState(initialDeviceState)
-  const [range, setRange] = useState({
-    minSize: 4.5,
-    maxSize: 5.6,
-    minYear: 2015,
+  const [minSize, setMinSize] = useState({
+    check: false,
+    value: 0,
+  })
+  const [maxSize, setMaxSize] = useState({
+    check: false,
+    value: 13,
+  })
+  const [minYear, setMinYear] = useState({
+    check: false,
+    value: 2010,
   })
 
   useEffect(() => {
-    if (show) {
-      setIsVisible(true)
-      document.body.classList.add('modal-open')
-    } else {
-      const timeoutId = setTimeout(() => setIsVisible(false), 300)
-      document.body.classList.remove('modal-open')
-      return () => clearTimeout(timeoutId)
+    const updateVendors = async () => {
+      if (show) {
+        setIsVisible(true)
+        document.body.classList.add('modal-open')
+      } else {
+        let resDevice = [...device]
+
+        if (minSize.check) {
+          resDevice = [
+            ...resDevice,
+            {
+              category: 'Минимальный размер экрана в дюймах',
+              options: [{ check: true, text: `${minSize.value}` }],
+            },
+          ]
+        }
+        if (maxSize.check) {
+          resDevice = [
+            ...resDevice,
+            {
+              category: 'Максимальный размер экрана в дюймах',
+              options: [{ check: true, text: `${maxSize.value}` }],
+            },
+          ]
+        }
+        if (minYear.check) {
+          resDevice = [
+            ...resDevice,
+            {
+              category: 'Минимальный год выпуска',
+              options: [{ check: true, text: `${minYear.value}` }],
+            },
+          ]
+        }
+        setIsLoading(true)
+        try {
+          const result = await filterDevice(resDevice)
+
+          dispatch(setVendors(result.groupedDevices || []))
+          dispatch(
+            setFilteredDevicesCount({
+              filteredDevicesCount: result.filteredDevicesCount,
+              totalDevicesCount: result.totalDevicesCount,
+            }),
+          )
+        } catch (error) {
+          console.error('Ошибка при фильтрации данных:', error)
+        } finally {
+          setIsLoading(false)
+        }
+
+        const timeoutId = setTimeout(() => setIsVisible(false), 300)
+        document.body.classList.remove('modal-open')
+        return () => clearTimeout(timeoutId)
+      }
     }
-  }, [show])
+
+    updateVendors()
+  }, [show, device, minSize, maxSize, minYear, dispatch])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -138,10 +231,6 @@ const Modal: React.FC<ModalProps> = ({ show, setShow }) => {
     newDevice[categoryIndex].options[optionIndex].check =
       !newDevice[categoryIndex].options[optionIndex].check
     setDevice(newDevice)
-  }
-
-  const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRange({ ...range, [e.target.name]: parseFloat(e.target.value) })
   }
 
   return (
@@ -195,8 +284,18 @@ const Modal: React.FC<ModalProps> = ({ show, setShow }) => {
                         ))}
                       </div>
                     ))}
-                    <div className="mb-4">
-                      <p>Минимальный размер экрана в дюймах:</p>
+                    <div>
+                      <p className="mb-2 flex items-center gap-x-2 text-[14px]">
+                        <input
+                          type="checkbox"
+                          className="h-5 min-w-5 cursor-pointer accent-primary"
+                          checked={minSize.check}
+                          onChange={(e) =>
+                            setMinSize({ ...minSize, check: e.target.checked })
+                          }
+                        />
+                        Минимальный размер экрана в дюймах:
+                      </p>
                       <div className="mx-2 flex items-start justify-between gap-x-1">
                         <input
                           type="range"
@@ -204,15 +303,30 @@ const Modal: React.FC<ModalProps> = ({ show, setShow }) => {
                           max="13"
                           step="0.1"
                           name="minSize"
-                          value={range.minSize}
+                          value={minSize.value}
                           className="range"
-                          onChange={handleRangeChange}
+                          onChange={(e) =>
+                            setMinSize({
+                              ...minSize,
+                              value: Number(e.target.value),
+                            })
+                          }
                         />
-                        <span>{range.minSize}</span>
+                        <span>{minSize.value}</span>
                       </div>
                     </div>
-                    <div className="mb-4">
-                      <p>Максимальный размер экрана в дюймах:</p>
+                    <div>
+                      <p className="mb-2 flex items-center gap-x-2 text-[14px]">
+                        <input
+                          type="checkbox"
+                          className="h-5 min-w-5 cursor-pointer accent-primary"
+                          checked={maxSize.check}
+                          onChange={(e) =>
+                            setMaxSize({ ...maxSize, check: e.target.checked })
+                          }
+                        />
+                        Максимальный размер экрана в дюймах:
+                      </p>
                       <div className="mx-2 flex items-start justify-between gap-x-1">
                         <input
                           type="range"
@@ -220,26 +334,49 @@ const Modal: React.FC<ModalProps> = ({ show, setShow }) => {
                           max="13"
                           step="0.1"
                           name="maxSize"
-                          value={range.maxSize}
+                          value={maxSize.value}
                           className="range"
-                          onChange={handleRangeChange}
+                          onChange={(e) =>
+                            setMaxSize({
+                              ...maxSize,
+                              value: Number(e.target.value),
+                            })
+                          }
                         />
-                        <span>{range.maxSize}</span>
+                        <span>{maxSize.value}</span>
                       </div>
                     </div>
-                    <div className="mb-4">
-                      <p>Минимальный год выпуска:</p>
+                    <div>
+                      <p className="mb-2 flex items-center gap-x-2 text-[14px]">
+                        <input
+                          type="checkbox"
+                          className="h-5 min-w-5 cursor-pointer accent-primary"
+                          checked={minYear.check}
+                          onChange={(e) =>
+                            setMinYear({
+                              ...minYear,
+                              check: e.target.checked,
+                            })
+                          }
+                        />
+                        Минимальный год выпуска:
+                      </p>
                       <div className="mx-2 flex items-start justify-between gap-x-1">
                         <input
                           type="range"
                           min="2010"
                           max="2024"
                           name="minYear"
-                          value={range.minYear}
+                          value={minYear.value}
                           className="range"
-                          onChange={handleRangeChange}
+                          onChange={(e) =>
+                            setMinYear({
+                              ...minYear,
+                              value: Number(e.target.value),
+                            })
+                          }
                         />
-                        <span>{range.minYear}</span>
+                        <span>{minYear.value}</span>
                       </div>
                     </div>
                   </div>
@@ -248,11 +385,42 @@ const Modal: React.FC<ModalProps> = ({ show, setShow }) => {
                 {/* Footer */}
                 <div className="flex items-center justify-end px-6 py-3">
                   <button
-                    className="w-full rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg hover:shadow-primary/50"
+                    className={`hover:shadow-primary/50" w-full rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg ${
+                      isLoading
+                        ? 'cursor-not-allowed opacity-50'
+                        : 'hover:shadow-lg hover:shadow-primary/50'
+                    }`}
                     type="button"
                     onClick={() => setShow(false)}
+                    disabled={isLoading}
                   >
-                    Применить
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <svg
+                          className="mr-2 h-5 w-5 animate-spin text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          ></path>
+                        </svg>
+                        Обработка...
+                      </div>
+                    ) : (
+                      <>Применить</>
+                    )}
                   </button>
                 </div>
               </div>

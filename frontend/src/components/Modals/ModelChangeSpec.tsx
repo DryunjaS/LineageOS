@@ -7,7 +7,7 @@ interface ModalProps {
   show: boolean
   setShow: React.Dispatch<React.SetStateAction<boolean>>
   data: DeviceType
-  field: { key0: string; key1: string }
+  field: { key0: string; key1: keyof SpecificDevice } // Использование keyof SpecificDevice
 }
 
 const ModalChangeSpec: React.FC<ModalProps> = ({
@@ -17,10 +17,9 @@ const ModalChangeSpec: React.FC<ModalProps> = ({
   field,
 }) => {
   const [isVisible, setIsVisible] = useState(show)
-  const [error, setError] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState<string[]>([''])
   const [info, setInfo] = useState<InfoDevice>({
-    Downloads: [],
+    Downloads: '',
     Guides: [],
     Special_boot_modes: [],
     Known_quirks: [],
@@ -32,6 +31,7 @@ const ModalChangeSpec: React.FC<ModalProps> = ({
     Specifications: {},
     LineageOS_info: {},
   })
+  const [isLoading, setIsLoading] = useState(false) // Добавляем состояние загрузки
 
   const newItemList = 'Новый пункт'
 
@@ -51,7 +51,7 @@ const ModalChangeSpec: React.FC<ModalProps> = ({
       }
 
       setInfo({
-        Downloads: data?.info.Downloads || [],
+        Downloads: data?.info.Downloads || '',
         Guides: data?.info.Guides || [],
         Special_boot_modes: data?.info.Special_boot_modes || [],
         Known_quirks: data?.info.Known_quirks || [],
@@ -101,30 +101,37 @@ const ModalChangeSpec: React.FC<ModalProps> = ({
     if (field.key1) {
       let updatedSpec = { ...specific }
 
-      const key0 = field.key0
-      const key1 = field.key1
+      const key0 = field.key0.trim() // Убираем пробелы у key0
+      const key1 = field.key1.trim() // Убираем пробелы у key1
 
       if (newItemList === key0) {
-        if (inputValue[0].length) {
-          updatedSpec[key1] = {
-            ...updatedSpec[key1],
-            [inputValue]: 'Введите значение',
+        if (inputValue[0].trim().length) {
+          updatedSpec[key1 as keyof typeof updatedSpec] = {
+            ...(updatedSpec[key1 as keyof typeof updatedSpec] as any),
+            [inputValue.map((item) => item.trim()) as any]: 'Введите значение',
           }
         }
       } else {
-        const filteredValues = inputValue.filter((item) => item.trim() !== '')
+        const filteredValues = inputValue
+          .map((item) => item.trim())
+          .filter((item) => item !== '')
+
         if (filteredValues.length) {
-          updatedSpec[key1] = {
-            ...updatedSpec[key1],
+          updatedSpec[key1 as keyof typeof updatedSpec] = {
+            ...(updatedSpec[key1 as keyof typeof updatedSpec] as any),
             [key0]: filteredValues,
           }
         } else {
-          const { [key0]: _, ...rest } = updatedSpec[key1]
-          updatedSpec[key1] = rest
+          const { [key0]: _, ...rest } = updatedSpec[
+            key1 as keyof typeof updatedSpec
+          ] as any
+          updatedSpec[key1 as keyof typeof updatedSpec] = rest
         }
       }
 
       setSpecific(updatedSpec)
+
+      setIsLoading(true) // Устанавливаем состояние загрузки в true перед началом запроса
       try {
         const DEVICE_ID = Number(sessionStorage.getItem('tmp'))
         const newDevice = {
@@ -136,16 +143,16 @@ const ModalChangeSpec: React.FC<ModalProps> = ({
           },
           info: info,
           specific: updatedSpec,
-          vendor: data.vendor.id,
+          vendor: data.vendor,
         }
 
         await changeInputDevice(newDevice, DEVICE_ID)
 
-        setError(null)
         setShow(false)
       } catch (err) {
         console.error('Error creating device:', err)
-        setError('Не удалось создать устройство. Попробуйте снова.')
+      } finally {
+        setIsLoading(false) // Сбрасываем состояние загрузки после завершения запроса
       }
     }
   }
@@ -190,7 +197,7 @@ const ModalChangeSpec: React.FC<ModalProps> = ({
                     <span>×</span>
                   </button>
                 </div>
-                {/* Body */}
+                {/* Основная часть */}
                 <div className="relative flex-auto px-6">
                   <div className="overflow-y-auto">
                     <label>Текст</label>
@@ -203,6 +210,7 @@ const ModalChangeSpec: React.FC<ModalProps> = ({
                           placeholder="Введите текст..."
                           value={item}
                           onChange={(e) => handleChange(e, index)}
+                          disabled={isLoading} // Отключаем ввод при загрузке
                         />
                       ))}
                       {newItemList !== field.key0 && (
@@ -221,11 +229,42 @@ const ModalChangeSpec: React.FC<ModalProps> = ({
                 {/* Footer */}
                 <div className="flex items-center justify-end px-6 py-3">
                   <button
-                    className="w-full rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg hover:shadow-primary/50"
+                    className={`w-full rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 ${
+                      isLoading
+                        ? 'cursor-not-allowed opacity-50'
+                        : 'hover:shadow-lg hover:shadow-primary/50'
+                    }`}
                     type="button"
                     onClick={handleEnter}
+                    disabled={isLoading} // Отключаем кнопку при загрузке
                   >
-                    Изменить
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <svg
+                          className="mr-2 h-5 w-5 animate-spin text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          ></path>
+                        </svg>
+                        Загрузка...
+                      </div>
+                    ) : (
+                      'Изменить'
+                    )}
                   </button>
                 </div>
               </div>

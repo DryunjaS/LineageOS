@@ -21,7 +21,10 @@ const vendorSlice = createSlice({
         devices: [],
       })
     },
-    updateVendor(state, action: PayloadAction<{ id: number; name: string }>) {
+    updateVendor(
+      state,
+      action: PayloadAction<{ id: number | null; name: string }>,
+    ) {
       const index = state.vendors.findIndex(
         (vendor) => vendor.id === action.payload.id,
       )
@@ -32,7 +35,7 @@ const vendorSlice = createSlice({
         }
       }
     },
-    removeVendor(state, action: PayloadAction<{ id: number }>) {
+    removeVendor(state, action: PayloadAction<{ id: number | null }>) {
       state.vendors = state.vendors.filter(
         (vendor) => vendor.id !== action.payload.id,
       )
@@ -56,6 +59,7 @@ const vendorSlice = createSlice({
             name: {
               Model: action.payload.Model,
               Code: action.payload.Code,
+              Img: '',
             },
           },
         ]
@@ -64,8 +68,8 @@ const vendorSlice = createSlice({
     updateDevicetoVendor(
       state,
       action: PayloadAction<{
-        idVendor: number
-        idDevice: number
+        idVendor: number | null
+        idDevice: number | null
         data: NameDevice
       }>,
     ) {
@@ -86,7 +90,10 @@ const vendorSlice = createSlice({
     },
     removeDevicetoVendor(
       state,
-      action: PayloadAction<{ idVendor: number; idDevice: number }>,
+      action: PayloadAction<{
+        idVendor: number | null
+        idDevice: number | null
+      }>,
     ) {
       const { idVendor, idDevice } = action.payload
       const vendorIndex = state.vendors.findIndex(

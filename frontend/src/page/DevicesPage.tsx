@@ -6,6 +6,7 @@ import DevicePreview from '../components/DevicePreview'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'
 import { setVendors } from '../store/vendorSlice'
+import { setFilteredDevicesCount } from '../store/deviceSlice'
 
 const DevicesPage = () => {
   const [showNavBar, setShowNavBar] = useState(true)
@@ -14,6 +15,12 @@ const DevicesPage = () => {
 
   const dispatch = useDispatch()
   const vendors = useSelector((state: RootState) => state.vendor.vendors)
+  const filteredDevicesCount = useSelector(
+    (state: RootState) => state.device.filteredDevicesCount,
+  )
+  const totalDevicesCount = useSelector(
+    (state: RootState) => state.device.totalDevicesCount,
+  )
 
   const handleScroll = () => {
     const currentScrollY = window.scrollY
@@ -32,14 +39,23 @@ const DevicesPage = () => {
     }
   }, [lastScrollY])
 
+  const resetFilter = async () => {
+    try {
+      const response = await getDevicesGroupedByVendor()
+      dispatch(setVendors(response))
+      dispatch(
+        setFilteredDevicesCount({
+          filteredDevicesCount: response.length,
+          totalDevicesCount: response.length,
+        }),
+      )
+    } catch (err) {
+      console.error('Error fetching devices:', err)
+    }
+  }
+
   useEffect(() => {
-    getDevicesGroupedByVendor()
-      .then((response) => {
-        dispatch(setVendors(response))
-      })
-      .catch((err) => {
-        console.log(err)
-      })
+    resetFilter()
   }, [])
 
   return (
@@ -63,12 +79,23 @@ const DevicesPage = () => {
             Вы можете отобразить их, отключив "Скрывать снятые с производства
             устройства" в фильтрах устройств ниже:
           </p>
-          <button
-            className="rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg hover:shadow-primary/50"
-            onClick={() => setShowModal(true)}
-          >
-            Фильтр (<span>195</span> из 483 показанныx)
-          </button>
+          <div className="flex max-w-[350px] flex-wrap justify-between">
+            <button
+              className="mb-1 rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg hover:shadow-primary/50"
+              onClick={() => setShowModal(true)}
+            >
+              Фильтр (<span>{filteredDevicesCount}</span> из {totalDevicesCount}{' '}
+              показанныx)
+            </button>
+            {filteredDevicesCount !== totalDevicesCount && (
+              <button
+                className="mb-1 rounded-[0.2rem] bg-gray-500 px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg"
+                onClick={resetFilter}
+              >
+                Сбросить
+              </button>
+            )}
+          </div>
 
           <div className="mx-auto mt-5">
             <h2 className="font-light" id="devices">
@@ -99,12 +126,10 @@ const DevicesPage = () => {
                   </a>
                   <div className="grid grid-cols-1 gap-y-4 scr350:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                     {group.devices.map((device) => (
-                      <div className="relative">
-                        <DevicePreview
-                          idDevice={device.id}
-                          deviceName={device.name}
-                        />
-                      </div>
+                      <DevicePreview
+                        idDevice={device.id}
+                        deviceName={device.name}
+                      />
                     ))}
 
                     <DevicePreview
@@ -139,7 +164,7 @@ const DevicesPage = () => {
               </b>
             </p>
           </div>
-          <div className="mb-4 lg:mb-0">
+          <div className="mb-4 text-center lg:mb-0">
             <p className="font-light">
               Лицензированный в соответствии с{' '}
               <a href="#" className="text-primary">

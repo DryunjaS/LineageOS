@@ -146,7 +146,11 @@ const ItemPage = () => {
                   alt={device}
                   className="h-auto w-[200px]"
                 />
-                <span>{device}</span>
+                <span>
+                  {' '}
+                  {data?.name.Model} ({data?.name.Code})
+                </span>{' '}
+                <br />
               </div>
 
               {data?.specific?.Main &&
@@ -283,7 +287,7 @@ const ItemPage = () => {
               </b>
             </p>
           </div>
-          <div className="mb-4 lg:mb-0">
+          <div className="mb-4 text-center lg:mb-0">
             <p className="font-light">
               Лицензированный в соответствии с{' '}
               <a href="#" className="text-primary">

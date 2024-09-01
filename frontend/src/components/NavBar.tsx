@@ -9,7 +9,7 @@ const NavBar = () => {
 
   return (
     <nav className="w-full shadow-xl">
-      <div className="mx-auto flex h-20 w-10/12 items-center justify-between text-[#555555] sm:px-3">
+      <div className="z-10 mx-auto flex h-20 w-10/12 items-center justify-between text-[#555555] sm:px-3">
         <div>
           <a href="/" className="text-primary">
             <svg

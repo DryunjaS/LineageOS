@@ -1,10 +1,18 @@
 import axios from 'axios'
 import { VendorType } from '../../interfaces/vendor'
+
 export async function getVendors() {
   const { data } = await axios.get(
     `${import.meta.env.VITE_URL_SERVER}/vendor/get-vendors`,
   )
-  data.sort((a: VendorType, b: VendorType) => a.id - b.id)
+
+  data.sort((a: VendorType, b: VendorType) => {
+    if (a.id === null || b.id === null) {
+      return 0
+    }
+    return a.id - b.id
+  })
+
   return data
 }
 export async function createVendor(vendorName: string) {

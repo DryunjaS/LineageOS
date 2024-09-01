@@ -13,7 +13,9 @@ interface DeviceType {
   name: NameDevice
   info: InfoDevice
   specific: SpecificDevice
+  vendor: number
 }
+
 const ItemADMIN = () => {
   const [showNavBar, setShowNavBar] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
@@ -22,9 +24,37 @@ const ItemADMIN = () => {
   const [showModalSpec, setShowModalSpec] = useState(false)
 
   const { device } = useParams()
-  const [data, setData] = useState<DeviceType>()
+  const [data, setData] = useState<DeviceType>({
+    id: 0,
+    name: {
+      Model: '',
+      Code: '',
+      Img: '',
+    },
+    info: {
+      Downloads: '',
+      Guides: [],
+      Special_boot_modes: [],
+      Known_quirks: [],
+      Find_help_online: '',
+      Report_a_bug: '',
+    },
+    specific: {
+      Main: {},
+      Specifications: {},
+      LineageOS_info: {},
+    },
+    vendor: 0,
+  })
+
   const [field, setField] = useState('')
-  const [fieldSpec, setFieldSpec] = useState({})
+  const [fieldSpec, setFieldSpec] = useState<{
+    key0: string
+    key1: keyof SpecificDevice
+  }>({
+    key0: '',
+    key1: 'Main',
+  })
 
   const handleScroll = () => {
     const currentScrollY = window.scrollY
@@ -58,15 +88,17 @@ const ItemADMIN = () => {
     setShowModalInfo(true)
     setField(field)
   }
-  const changeFieldSpec = (key0: string, key1: string) => {
+  const changeFieldSpec = (key0: string, key1: keyof SpecificDevice) => {
     setShowModalSpec(true)
     setFieldSpec({ key0, key1 })
   }
-  const changeImg = async (event) => {
-    const file = event.target.files[0]
+  const changeImg = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
     const id = Number(sessionStorage.getItem('tmp'))
 
-    await uploadImgDevice(file, id)
+    if (file) {
+      await uploadImgDevice(file, id)
+    }
   }
   return (
     <div className="flex min-h-screen flex-col">
@@ -236,7 +268,10 @@ const ItemADMIN = () => {
                 />
                 <input type="file" accept="image/*" onChange={changeImg} />
 
-                <span>{device}</span>
+                <span>
+                  {data?.name.Model} ({data?.name.Code})
+                </span>
+                <br />
               </div>
               {data?.specific?.Main &&
               Object.keys(data?.specific?.Main).length > 0 ? (
@@ -395,7 +430,7 @@ const ItemADMIN = () => {
                   className="mx-auto my-1 flex aspect-square w-8 cursor-pointer items-center justify-center rounded-md bg-primary text-white transition-transform duration-200 hover:scale-110"
                   title="Добавить пункт"
                   onClick={() =>
-                    changeFieldSpec('Новый пункт', 'Specifications')
+                    changeFieldSpec('Новый пункт', 'LineageOS_info')
                   }
                 >
                   <PlusIcon />
@@ -422,7 +457,7 @@ const ItemADMIN = () => {
               </b>
             </p>
           </div>
-          <div className="mb-4 lg:mb-0">
+          <div className="mb-4 text-center lg:mb-0">
             <p className="font-light">
               Лицензированный в соответствии с{' '}
               <a href="#" className="text-primary">

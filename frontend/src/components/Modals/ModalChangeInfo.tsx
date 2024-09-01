@@ -17,7 +17,6 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
   field,
 }) => {
   const [isVisible, setIsVisible] = useState(show)
-  const [error, setError] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState<string[]>([''])
   const [info, setInfo] = useState<InfoDevice>({
     Downloads: '',
@@ -32,6 +31,7 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
     Specifications: {},
     LineageOS_info: {},
   })
+  const [isLoading, setIsLoading] = useState(false) // Добавляем состояние загрузки
 
   const fieldsToList: string[] = [
     'Руководства',
@@ -122,6 +122,7 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
       }
       setInfo(updatedInfo)
 
+      setIsLoading(true) // Устанавливаем состояние загрузки в true перед началом запроса
       try {
         const DEVICE_ID = Number(sessionStorage.getItem('tmp'))
         const newDevice = {
@@ -138,11 +139,11 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
 
         await changeInputDevice(newDevice, DEVICE_ID)
 
-        setError(null)
         setShow(false)
       } catch (err) {
         console.error('Error creating device:', err)
-        setError('Не удалось создать устройство. Попробуйте снова.')
+      } finally {
+        setIsLoading(false) // Сбрасываем состояние загрузки после завершения запроса
       }
     }
   }
@@ -199,6 +200,7 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
                           placeholder="Введите текст..."
                           value={item}
                           onChange={(e) => handleChange(e, index)}
+                          disabled={isLoading} // Отключаем ввод при загрузке
                         />
                       ))}
                       {fieldsToList.includes(field) && (
@@ -216,11 +218,42 @@ const ModalChangeInfo: React.FC<ModalProps> = ({
 
                 <div className="flex items-center justify-end px-6 py-3">
                   <button
-                    className="w-full rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 hover:shadow-lg hover:shadow-primary/50"
+                    className={`w-full rounded-[0.2rem] bg-primary px-6 py-3 text-xs uppercase text-white transition-all duration-300 ${
+                      isLoading
+                        ? 'cursor-not-allowed opacity-50'
+                        : 'hover:shadow-lg hover:shadow-primary/50'
+                    }`}
                     type="button"
                     onClick={handleEnter}
+                    disabled={isLoading} // Отключаем кнопку при загрузке
                   >
-                    Изменить
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <svg
+                          className="mr-2 h-5 w-5 animate-spin text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          ></path>
+                        </svg>
+                        Обработка...
+                      </div>
+                    ) : (
+                      'Изменить'
+                    )}
                   </button>
                 </div>
               </div>
