@@ -1,10 +1,8 @@
-import axios from 'axios'
 import { VendorType } from '../../interfaces/vendor'
+import { $api, $authApi } from '..'
 
 export async function getVendors() {
-  const { data } = await axios.get(
-    `${import.meta.env.VITE_URL_SERVER}/vendor/get-vendors`,
-  )
+  const { data } = await $api.get('vendor/get-vendors')
 
   data.sort((a: VendorType, b: VendorType) => {
     if (a.id === null || b.id === null) {
@@ -16,17 +14,12 @@ export async function getVendors() {
   return data
 }
 export async function createVendor(vendorName: string) {
-  console.log(vendorName)
-
   if (vendorName.trim().length) {
     const newVendor = {
       id: 1,
       name: vendorName.trim(),
     }
-    await axios.post(
-      `${import.meta.env.VITE_URL_SERVER}/vendor/create-vendor`,
-      newVendor,
-    )
+    await $authApi.post('vendor/create-vendor', newVendor)
   }
 }
 export async function changeVendor(value: string, id: number | null) {
@@ -35,14 +28,9 @@ export async function changeVendor(value: string, id: number | null) {
       id,
       name: value,
     }
-    await axios.put(
-      `${import.meta.env.VITE_URL_SERVER}/vendor/update-vendor/${id}`,
-      newVendor,
-    )
+    await $authApi.put(`vendor/update-vendor/${id}`, newVendor)
   }
 }
 export async function deleteVendor(id: number | null) {
-  await axios.delete(
-    `${import.meta.env.VITE_URL_SERVER}/vendor/delete-vendor/${id}`,
-  )
+  await $authApi.delete(`vendor/delete-vendor/${id}`)
 }

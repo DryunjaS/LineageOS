@@ -1,3 +1,4 @@
+import AuthPage from '../page/AuthPage'
 import DevicesADMIN from '../page/DevicesADMIN'
 import DevicesPage from '../page/DevicesPage'
 import ItemADMIN from '../page/ItemADMIN'
@@ -8,6 +9,10 @@ export const publicRoutes = [
   {
     path: '/',
     Component: MainPage,
+  },
+  {
+    path: '/auth',
+    Component: AuthPage,
   },
   {
     path: '/devices',

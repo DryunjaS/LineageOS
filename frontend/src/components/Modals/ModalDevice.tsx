@@ -10,7 +10,7 @@ import {
   createDevice,
   deleteDevice,
   getDevicesGroupedByVendor,
-} from '../../utils/device/func'
+} from '../../http/device/func'
 import { ActionDeviceType, VendorType } from '../../interfaces/vendor'
 import { useDispatch } from 'react-redux'
 import {

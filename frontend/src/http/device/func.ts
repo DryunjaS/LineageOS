@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { DevicesGroupType } from '../../page/DevicesADMIN'
 import {
   Category,
@@ -9,6 +8,7 @@ import {
   SpecificDevice,
 } from '../../interfaces/device'
 import { VendorGroupDevice } from '../../interfaces/vendor'
+import { $api, $authApi } from '..'
 
 export interface DeviceTypeCreate {
   id: number | null
@@ -21,16 +21,12 @@ export interface DeviceTypeCreate {
   }
 }
 export async function getDeviceByID(id: number) {
-  const { data } = await axios.get(
-    `${import.meta.env.VITE_URL_SERVER}/device/get-device/${id}`,
-  )
+  const { data } = await $api.get(`device/get-device/${id}`)
   return data
 }
 
 export async function getDevicesGroupedByVendor() {
-  const { data } = await axios.get(
-    `${import.meta.env.VITE_URL_SERVER}/device/get-devices-group-vendor`,
-  )
+  const { data } = await $api.get(`device/get-devices-group-vendor`)
   data.sort((a: DevicesGroupType, b: DevicesGroupType) => a.id - b.id)
   return data
 }
@@ -41,10 +37,7 @@ export async function createDevice(device: DeviceTypeCreate) {
       id: 123,
     }
 
-    await axios.post(
-      `${import.meta.env.VITE_URL_SERVER}/device/create-device`,
-      newDevice,
-    )
+    await $authApi.post('device/create-device', newDevice)
   }
 }
 export async function changeDevice(device: DeviceType, id: number | null) {
@@ -52,38 +45,25 @@ export async function changeDevice(device: DeviceType, id: number | null) {
     const newDevice = {
       ...device,
     }
-    console.log(newDevice)
-    await axios.put(
-      `${import.meta.env.VITE_URL_SERVER}/device/update-device/${id}`,
-      newDevice,
-    )
+    await $authApi.put(`device/update-device/${id}`, newDevice)
   }
 }
 export async function deleteDevice(id: number | null) {
-  await axios.delete(
-    `${import.meta.env.VITE_URL_SERVER}/device/delete-device/${id}`,
-  )
+  await $authApi.delete(`device/delete-device/${id}`)
 }
 
 export async function changeInputDevice(changeDevice: DeviceType, id: number) {
-  await axios.put(
-    `${import.meta.env.VITE_URL_SERVER}/device/update-device/${id}`,
-    changeDevice,
-  )
+  await $authApi.put(`device/update-device/${id}`, changeDevice)
 }
 
 export async function uploadImgDevice(image: any, id: number) {
   const formData = new FormData()
   formData.append('image', image)
-  await axios.post(
-    `${import.meta.env.VITE_URL_SERVER}/device/upload-img-device/${id}`,
-    formData,
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+  await $authApi.post(`device/upload-img-device/${id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
     },
-  )
+  })
 }
 export async function filterDevice(device: Category[]): Promise<{
   groupedDevices: VendorGroupDevice[]
@@ -92,7 +72,6 @@ export async function filterDevice(device: Category[]): Promise<{
 }> {
   const resultState: IresultCheak[] = []
 
-  // Формируем массив критериев фильтрации
   device.forEach((item) => {
     const arrOptionsTrue: string[] = []
     item.options.forEach((option) => {
@@ -110,12 +89,11 @@ export async function filterDevice(device: Category[]): Promise<{
   })
 
   try {
-    const response = await axios.post<{
+    const response = await $api.post<{
       groupedDevices: VendorGroupDevice[]
       filteredDevicesCount: number
       totalDevicesCount: number
-    }>(`${import.meta.env.VITE_URL_SERVER}/device/filter-device/`, resultState)
-
+    }>('device/filter-device', resultState)
     return response.data
   } catch (error) {
     console.error('Error while filtering device data:', error)

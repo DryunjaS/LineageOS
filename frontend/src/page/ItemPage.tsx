@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import NavDevice from '../components/NavDevice'
 import { useParams } from 'react-router-dom'
-import { getDeviceByID } from '../utils/device/func'
+import { getDeviceByID } from '../http/device/func'
 import { DeviceType } from '../interfaces/device'
 
 const ItemPage = () => {

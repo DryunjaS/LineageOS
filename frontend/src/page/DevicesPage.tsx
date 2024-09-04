@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import NavDevice from '../components/NavDevice'
 import Modal from '../components/Modals/Modal'
-import { getDevicesGroupedByVendor } from '../utils/device/func'
+import { getDevicesGroupedByVendor } from '../http/device/func'
 import DevicePreview from '../components/DevicePreview'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'

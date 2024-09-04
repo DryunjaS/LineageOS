@@ -5,7 +5,7 @@ import {
   changeVendor,
   createVendor,
   deleteVendor,
-} from '../../utils/vendor/func'
+} from '../../http/vendor/func'
 import { ActionVendorType } from '../../interfaces/vendor'
 import { addVendor, removeVendor, updateVendor } from '../../store/vendorSlice'
 

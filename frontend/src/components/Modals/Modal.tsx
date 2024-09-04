@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Category } from '../../interfaces/device'
-import { filterDevice } from '../../utils/device/func'
+import { filterDevice } from '../../http/device/func'
 import { useDispatch } from 'react-redux'
 import { setVendors } from '../../store/vendorSlice'
 import { setFilteredDevicesCount } from '../../store/deviceSlice'

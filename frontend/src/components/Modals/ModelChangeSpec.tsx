@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import PlusIcon from '../icons/Plus'
 import { DeviceType, InfoDevice, SpecificDevice } from '../../interfaces/device'
-import { changeInputDevice } from '../../utils/device/func'
+import { changeInputDevice } from '../../http/device/func'
 
 interface ModalProps {
   show: boolean

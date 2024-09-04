@@ -8,7 +8,7 @@ import {
   VendorType,
 } from '../interfaces/vendor'
 import { NameDevice } from '../interfaces/device'
-import { getDevicesGroupedByVendor } from '../utils/device/func'
+import { getDevicesGroupedByVendor } from '../http/device/func'
 import DevicePreview from '../components/DevicePreview'
 import DeleteIcon from '../components/icons/Delete'
 import WriteIcon from '../components/icons/Write'

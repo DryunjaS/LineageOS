@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Device } from 'src/modules/device/device.entity';
+import { Users } from 'src/modules/users/entitys/users.entity';
 import { Vendor } from 'src/modules/vendor/vendor.entity';
 
 @Module({
@@ -16,11 +17,11 @@ import { Vendor } from 'src/modules/vendor/vendor.entity';
         username: configService.get<string>('db_user'),
         password: configService.get<string>('db_password'),
         database: configService.get<string>('db_name'),
-        entities: [Device, Vendor],
+        entities: [Device, Vendor, Users],
         synchronize: true,
       }),
     }),
-    TypeOrmModule.forFeature([Device, Vendor]),
+    TypeOrmModule.forFeature([Device, Vendor, Users]),
   ],
   exports: [TypeOrmModule],
 })
