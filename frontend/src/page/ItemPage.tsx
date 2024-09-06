@@ -36,7 +36,7 @@ const ItemPage = () => {
       .catch((err) => {
         console.log(err)
       })
-  }, [])
+  }, [sessionStorage.getItem('tmp')])
   return (
     <div className="flex min-h-screen flex-col">
       <div

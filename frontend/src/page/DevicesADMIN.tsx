@@ -19,7 +19,7 @@ import { setVendors } from '../store/vendorSlice'
 import { RootState } from '../store'
 import { setFilteredDevicesCount } from '../store/deviceSlice'
 
-interface DevicesGroupItemType {
+export interface DevicesGroupItemType {
   id: number | null
   name: NameDevice
 }

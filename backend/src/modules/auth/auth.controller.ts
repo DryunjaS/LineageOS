@@ -28,14 +28,14 @@ export class AuthController {
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: 'Strict',
       path: '/',
       expires: new Date(Date.now() + 3600000),
     });
 
     res.cookie('isAuth', 'true', {
-      secure: true,
+      secure: false,
       sameSite: 'Strict',
       path: '/',
       expires: new Date(Date.now() + 3600000),
